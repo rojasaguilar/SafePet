@@ -2,7 +2,7 @@
 
 ## Estructura del proyecto
 
-`project/
- ├─ backend/
- ├─ app_flutter/
- └─ webapp_admin/`
+project/<br />
+ ├─ backend/<br />
+ ├─ app_flutter/<br />
+ └─ webapp_admin/<br />
