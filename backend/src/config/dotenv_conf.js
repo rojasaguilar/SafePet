@@ -1,0 +1,16 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
+export default {
+  API_KEY_FIREBASE:
+    process.env.API_KEY_FIREBASE || "couldnt resolve API_KEY_FIREBASE",
+  AUTH_DOMAIN_FIREBASE: process.env.AUTH_DOMAIN_FIREBASE,
+  PROJECT_ID_FIREBASE: process.env.PROJECT_ID_FIREBASE,
+  STORAGE_BUCKET_FIREBASE: process.env.STORAGE_BUCKET_FIREBASE,
+  MESSAGING_SENDER_ID_FIREBASE: process.env.MESSAGING_SENDER_ID_FIREBASE,
+  APP_ID_FIREBASE: process.env.APP_ID_FIREBASE,
+  MEASUREMENT_ID_FIREBASE: process.env.MEASUREMENT_ID_FIREBASE,
+  API_URL_BASE : process.env.API_URL_BASE,
+  PORT: process.env.PORT
+};
