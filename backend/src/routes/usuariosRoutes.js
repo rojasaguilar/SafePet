@@ -4,6 +4,6 @@ const router = express.Router();
 
 router
   .route("/")
-  .get((req, res) => res.send("<h1>Hello from route mascotas </h1>"));
+  .get((req, res) => res.send("<h1>Hello from route usuarios </h1>"));
 
 export default router;
