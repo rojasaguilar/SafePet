@@ -1,9 +1,13 @@
 import express from "express";
+import mascotaController from "../controllers/mascotaController.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .get((req, res) => res.send("<h1>Hello from route mascotas </h1>"));
+  .get(mascotaController.getMascotas)
+  .post(mascotaController.createMascota);
+
+router.route("/:mascotaId").get(mascotaController.getMascota);
 
 export default router;

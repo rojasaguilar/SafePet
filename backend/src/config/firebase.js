@@ -36,4 +36,4 @@ const  db = getFirestore(firebaseApp);
 //   return cityList;
 // }
 
-export default {firebaseApp, db};
+export {firebaseApp, db};
