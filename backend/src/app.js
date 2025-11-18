@@ -6,6 +6,7 @@ import dotenv_conf from "./config/dotenv_conf.js";
 import mascotasRouter from "./routes/mascotasRoutes.js";
 import usuariosRouter from "./routes/usuariosRoutes.js";
 import clinicasRouter from "./routes/clinicasRouter.js";
+import citasRouter from './routes/citasRouter.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get(`/`, (req, res) => {
 app.use(`${API_URL_BASE}/mascotas`, mascotasRouter);
 app.use(`${API_URL_BASE}/usuarios`, usuariosRouter);
 app.use(`${API_URL_BASE}/clinicas`, clinicasRouter);
+app.use(`${API_URL_BASE}/citas`, citasRouter);
 
 
 export default app;
