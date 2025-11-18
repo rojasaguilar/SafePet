@@ -1,14 +1,23 @@
-import express from "express";
-import mascotaRouter from "./mascotasRoutes.js";
+import express from 'express';
 
-import usuarioController from "../controllers/usuarioController.js";
+//MASCOTA ROUTER FOR SUB-ROUTES
+import mascotaRouter from './mascotasRoutes.js';
 
-import { getDuenoId } from "../middlewares/getDuenoId.js";
+//USUARIO CONTROLLER
+import usuarioController from '../controllers/usuarioController.js';
+
+//MIDDLEWARES
+import { getDuenoId } from '../middlewares/getDuenoId.js';
 
 const router = express.Router();
 
-router.route("/").get(usuarioController.getUsers);
+router
+  .route('/')
+  .get(usuarioController.getUsers)
+  .post(usuarioController.createUser);
 
-// router.use("/:id/mascotas", getDuenoId, mascotaRouter);
+router.route('/:id').get(usuarioController.getUser);
+
+router.use('/:id/mascotas', getDuenoId, mascotaRouter);
 
 export default router;

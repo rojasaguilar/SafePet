@@ -1,6 +1,9 @@
-import express from "express";
-
 export const getDuenoId = (req, res, next) => {
-  req.duenoId = req.params.id;
+  const queryObject = {
+    ui_dueno: req.params.id,
+  };
+
+  req.queryObject = queryObject;
+
   next();
 };

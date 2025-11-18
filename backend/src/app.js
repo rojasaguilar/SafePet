@@ -5,6 +5,7 @@ import dotenv_conf from "./config/dotenv_conf.js";
 //ROUTERS
 import mascotasRouter from "./routes/mascotasRoutes.js";
 import usuariosRouter from "./routes/usuariosRoutes.js";
+import clinicasRouter from "./routes/clinicasRouter.js";
 
 const app = express();
 
@@ -23,5 +24,7 @@ app.get(`/`, (req, res) => {
 // 2) MIDDLEWARE FOR SPECIFIC ROUTES (MY ROUTERS)
 app.use(`${API_URL_BASE}/mascotas`, mascotasRouter);
 app.use(`${API_URL_BASE}/usuarios`, usuariosRouter);
+app.use(`${API_URL_BASE}/clinicas`, clinicasRouter);
+
 
 export default app;

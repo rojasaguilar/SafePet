@@ -1,20 +1,14 @@
 import { db } from "../config/firebase.js";
-import {
-  collection,
-  getDocs,
-  getDoc,
-  doc,
-  setDoc,
-  addDoc,
-} from "firebase/firestore/lite";
+import admin from "firebase-admin";
 
-const usuariosCol = collection(db, "usuarios");
+// Referencia a colección
+const usuariosCol = db.collection("usuarios");
 
 const getUsers = async (req, res) => {
-  const usuariosSnapshot = await getDocs(usuariosCol);
-
   try {
-    const usuarios = usuariosSnapshot.docs.map((doc) => {
+    const snapshot = await usuariosCol.get();
+
+    const usuarios = snapshot.docs.map(doc => {
       const d = doc.data();
       return {
         uid: doc.id,
@@ -34,11 +28,82 @@ const getUsers = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: "fail",
-      message: error,
+      message: error.message,
     });
   }
 };
 
+const getUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const ref = usuariosCol.doc(id);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      return res.status(404).json({
+        status: "fail",
+        message: `usuario con el id ${id} no existe`,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        uid: snap.id,
+        ...snap.data(),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
+      error: error.message,
+    });
+  }
+};
+
+
+const createUser = async (req, res) => {
+  const data = req.body;
+
+  try {
+    // Crear usuario en Firebase Auth
+    const userRecord = await admin.auth().createUser({
+      email: data.email,
+      password: data.password,
+      displayName: data.username || `${data.nombre}_${data.apellidos}`,
+    });
+
+    // Datos para Firestore
+    const usuario = {
+      nombre: data.nombre,
+      apellidos: data.apellidos,
+      username: data.username,
+      email: data.email,
+      rol: data.rol,
+    };
+
+    // Guardar en Firestore
+    await usuariosCol.doc(userRecord.uid).set(usuario);
+
+    return res.status(200).json({
+      status: "success",
+      message: "usuario registrado satisfactoriamente",
+      data: usuario,
+    });
+
+  } catch (error) {
+    return res.status(400).json({
+      status: "fail",
+      error: error.message,
+    });
+  }
+};
+
+
+
 export default {
   getUsers,
+  getUser,
+  createUser,
 };
