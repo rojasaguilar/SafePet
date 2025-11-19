@@ -3,8 +3,13 @@ import { db } from '../config/firebase.js';
 const citasCol = db.collection('citas');
 
 const getCitas = async (req, res) => {
+  let query = citasCol;
+  if (req.queryObject) {
+    query = query.where('mascota_id', '==', req.mascotaId);
+  }
+
   try {
-    const snapshot = await citasCol.get();
+    const snapshot = await query.get();
 
     const citas = snapshot.docs.map((doc) => {
       const d = doc.data();
@@ -80,8 +85,8 @@ const addCita = async (req, res) => {
     vet_id: vetRef,
     clinica_id: clinicaRef,
     fechaProgramada: new Date(data.fechaProgramada),
-    asistencia: "pendiente",
-    fechaCreacion: new Date()
+    asistencia: 'pendiente',
+    fechaCreacion: new Date(),
   };
 
   try {
