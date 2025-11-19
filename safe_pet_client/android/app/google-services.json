@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "556786455062",
+    "project_id": "safepet-deb4d",
+    "storage_bucket": "safepet-deb4d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556786455062:android:c441b46a25514705ee9b37",
+        "android_client_info": {
+          "package_name": "com.example.safe_pet_client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9S_diwj81R6ieQNP5orrs-NChLM6BuIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

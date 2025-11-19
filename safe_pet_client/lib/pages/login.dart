@@ -25,8 +25,10 @@ class _LoginState extends State<Login> {
         password: password.text.trim(),
       );
 
+      print(userCredential);
+
       final token = await userCredential.user!.getIdToken();
-      print("TOKEN: $token");
+      print(token);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login correcto vato: $token")),
@@ -126,9 +128,10 @@ class _LoginState extends State<Login> {
 
             FilledButton(
               onPressed: (){
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (x)=>Home()));
+                login();
+              //   Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (x)=>Home()));
               },
               child: Text("Iniciar sesión", style: TextStyle(
                   color: Colors.white,

@@ -3,6 +3,13 @@ import { db } from '../config/firebase.js';
 const citasCol = db.collection('citas');
 
 const getCitas = async (req, res) => {
+
+//MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+const {loggedUser} = req
+
+console.log(loggedUser)
+//MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+
   let query = citasCol;
   if (req.queryObject) {
     query = query.where('mascota_id', '==', req.mascotaId);
