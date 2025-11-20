@@ -1,14 +1,14 @@
-import { db } from "../config/firebase.js";
-import admin from "firebase-admin";
+import { db } from '../config/firebase.js';
+import admin from 'firebase-admin';
 
 // Referencia a colección
-const usuariosCol = db.collection("usuarios");
+const usuariosCol = db.collection('usuarios');
 
 const getUsers = async (req, res) => {
   try {
     const snapshot = await usuariosCol.get();
 
-    const usuarios = snapshot.docs.map(doc => {
+    const usuarios = snapshot.docs.map((doc) => {
       const d = doc.data();
       return {
         uid: doc.id,
@@ -21,13 +21,13 @@ const getUsers = async (req, res) => {
     });
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       results: usuarios.length,
       data: usuarios,
     });
   } catch (error) {
     return res.status(500).json({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
   }
@@ -42,13 +42,13 @@ const getUser = async (req, res) => {
 
     if (!snap.exists) {
       return res.status(404).json({
-        status: "fail",
+        status: 'fail',
         message: `usuario con el id ${id} no existe`,
       });
     }
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       data: {
         uid: snap.id,
         ...snap.data(),
@@ -56,17 +56,29 @@ const getUser = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      status: "fail",
+      status: 'fail',
       error: error.message,
     });
   }
 };
 
-
 const createUser = async (req, res) => {
   const data = req.body;
 
   try {
+    // Datos para Firestore
+    const usuario = {
+      nombre: data.nombre,
+      apellidos: data.apellidos,
+      username: data.username || `${data.nombre}_${data.apellidos}`,
+      email: data.email,
+      rol: data.rol,
+    };
+
+    // Guardar en Firestore
+    const usuarioGuardado = await usuariosCol.doc(userRecord.uid).set(usuario);
+
+    //VERIFICAR SI SE INSERTÓ, SI SI PUES AGREGAR EN AUTHORIZATION
     // Crear usuario en Firebase Auth
     const userRecord = await admin.auth().createUser({
       email: data.email,
@@ -74,33 +86,18 @@ const createUser = async (req, res) => {
       displayName: data.username || `${data.nombre}_${data.apellidos}`,
     });
 
-    // Datos para Firestore
-    const usuario = {
-      nombre: data.nombre,
-      apellidos: data.apellidos,
-      username: data.username,
-      email: data.email,
-      rol: data.rol,
-    };
-
-    // Guardar en Firestore
-    await usuariosCol.doc(userRecord.uid).set(usuario);
-
     return res.status(200).json({
-      status: "success",
-      message: "usuario registrado satisfactoriamente",
+      status: 'success',
+      message: 'usuario registrado satisfactoriamente',
       data: usuario,
     });
-
   } catch (error) {
     return res.status(400).json({
-      status: "fail",
+      status: 'fail',
       error: error.message,
     });
   }
 };
-
-
 
 export default {
   getUsers,
