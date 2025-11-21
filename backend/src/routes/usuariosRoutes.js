@@ -8,11 +8,13 @@ import usuarioController from '../controllers/usuarioController.js';
 
 //MIDDLEWARES
 // import { getDuenoId } from '../middlewares/getDuenoId.js';
+import { incomingApp } from '../middlewares/getIncomingApp.js';
 
 const router = express.Router();
 
 router
   .route('/')
+  // .get(incomingApp, usuarioController.getUsers)
   .get(usuarioController.getUsers)
   .post(usuarioController.createUser);
 
