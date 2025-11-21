@@ -90,6 +90,36 @@ const addCita = async (req, res) => {
   const vetRef = db.collection('usuario').doc(data.vet_id);
   const clinicaRef = db.collection('clinicas').doc(data.clinica_id);
 
+  const duenoSnapshot = await duenoRef.get();
+  const mascotaSnapshot = await mascotaRef.get();
+  const vetSnapshot = await vetRef.get();
+  const clinicaSnapshot = await clinicaRef.get();
+
+  if (!duenoSnapshot.exists) {
+    return res.status(400).json({
+      status: 'FAIL',
+      message: `Dueño con id ${data.ui_dueno} no existe`,
+    });
+  }
+  if (!mascotaSnapshot.exists) {
+    return res.status(400).json({
+      status: 'FAIL',
+      message: `Mascota con id ${data.mascota_id} no existe`,
+    });
+  }
+  if (!vetSnapshot.exists) {
+    return res.status(400).json({
+      status: 'FAIL',
+      message: `Veterinario con id ${data.vet_id} no existe`,
+    });
+  }
+  if (!clinicaSnapshot.exists) {
+    return res.status(400).json({
+      status: 'FAIL',
+      message: `Clinica con id ${data.clinica_id} no existe`,
+    });
+  }
+
   const cita = {
     ui_dueno: duenoRef,
     mascota_id: mascotaRef,
