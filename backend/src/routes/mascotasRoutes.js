@@ -1,9 +1,10 @@
 import express from 'express';
 import mascotaController from '../controllers/mascotaController.js';
 
-import citasRouter from './citasRouter.js';
+// import citasRouter from './citasRouter.js';
 
-const router = express.Router({ mergeParams: true });
+// const router = express.Router({ mergeParams: true });
+const router = express.Router();
 
 router
   .route('/')
@@ -11,6 +12,6 @@ router
   .post(mascotaController.createMascota);
 
 router.route('/:mascotaId').get(mascotaController.getMascota);
-router.use('/:mascotaId/citas', citasRouter);
+// router.use('/:mascotaId/citas', citasRouter);
 
 export default router;

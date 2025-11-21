@@ -3,17 +3,16 @@ import { db } from '../config/firebase.js';
 const citasCol = db.collection('citas');
 
 const getCitas = async (req, res) => {
+  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+  // const {loggedUser} = req
 
-//MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
-const {loggedUser} = req
-
-console.log(loggedUser)
-//MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+  // console.log(loggedUser)
+  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
 
   let query = citasCol;
-  if (req.queryObject) {
-    query = query.where('mascota_id', '==', req.mascotaId);
-  }
+  // if (req.queryObject) {
+  //   query = query.where('mascota_id', '==', req.mascotaId);
+  // }
 
   try {
     const snapshot = await query.get();
@@ -47,22 +46,26 @@ console.log(loggedUser)
 };
 
 const getCita = async (req, res) => {
-  const { cita_id } = req.body;
+  const { id } = req.params;
 
   try {
-    const ref = db.doc(cita_id);
+    const ref = citasCol.doc(id);
     const snapshot = await ref.get();
 
-    if (!snapshot.exists()) {
+    if (!snapshot.exists) {
       return res.status(404).json({
         status: 'fail',
-        message: `Cita  id ${cita_id} no existe`,
+        message: `Cita  id ${id} no existe`,
       });
     }
 
+    const citadData = snapshot.data();
+
     const cita = {
       cita_id: ref.id,
-      ...snapshot.data(),
+      ...citadData,
+      fechaCreacion: citadData.fechaCreacion.toDate(),
+      fechaProgramada: citadData.fechaProgramada.toDate(),
     };
 
     return res.status(200).json({
@@ -70,6 +73,7 @@ const getCita = async (req, res) => {
       data: cita,
     });
   } catch (error) {
+    console.log(error);
     return res.status(200).json({
       status: 'fail',
       error,

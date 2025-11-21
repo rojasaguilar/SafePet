@@ -7,7 +7,7 @@ import mascotaRouter from './mascotasRoutes.js';
 import usuarioController from '../controllers/usuarioController.js';
 
 //MIDDLEWARES
-import { getDuenoId } from '../middlewares/getDuenoId.js';
+// import { getDuenoId } from '../middlewares/getDuenoId.js';
 
 const router = express.Router();
 
@@ -18,6 +18,6 @@ router
 
 router.route('/:id').get(usuarioController.getUser);
 
-router.use('/:id/mascotas', getDuenoId, mascotaRouter);
+// router.use('/:id/mascotas', getDuenoId, mascotaRouter);
 
 export default router;
