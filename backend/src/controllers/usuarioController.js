@@ -66,19 +66,6 @@ const createUser = async (req, res) => {
   const data = req.body;
 
   try {
-    // Datos para Firestore
-    const usuario = {
-      nombre: data.nombre,
-      apellidos: data.apellidos,
-      username: data.username || `${data.nombre}_${data.apellidos}`,
-      email: data.email,
-      rol: data.rol,
-    };
-
-    // Guardar en Firestore
-    const usuarioGuardado = await usuariosCol.doc(userRecord.uid).set(usuario);
-
-    //VERIFICAR SI SE INSERTÓ, SI SI PUES AGREGAR EN AUTHORIZATION
     // Crear usuario en Firebase Auth
     const userRecord = await admin.auth().createUser({
       email: data.email,
@@ -86,11 +73,31 @@ const createUser = async (req, res) => {
       displayName: data.username || `${data.nombre}_${data.apellidos}`,
     });
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'usuario registrado satisfactoriamente',
-      data: usuario,
-    });
+    //SI SE PUDO REGISTRAR EN FIREBASE AUTH
+    if (userRecord) {
+      // Datos para Firestore
+      const usuario = {
+        nombre: data.nombre,
+        apellidos: data.apellidos,
+        username: data.username || `${data.nombre}_${data.apellidos}`,
+        email: data.email,
+        rol: data.rol,
+      };
+
+      // Guardar en Firestore
+      const usuarioGuardado = await usuariosCol
+        .doc(userRecord.uid)
+        .set(usuario);
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'usuario registrado satisfactoriamente',
+        data: {
+          uid: userRecord.uid,
+          ...usuario,
+        },
+      });
+    }
   } catch (error) {
     return res.status(400).json({
       status: 'fail',
