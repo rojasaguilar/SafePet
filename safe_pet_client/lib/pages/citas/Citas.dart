@@ -29,10 +29,6 @@ class _CitasScreenState extends State<PantallaCitas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Citas"),
-        centerTitle: true,
-      ),
       body: ListView.builder(
         itemCount: citas.length,
         itemBuilder: (context, index) {
@@ -64,8 +60,7 @@ class _CitasScreenState extends State<PantallaCitas> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        },
+        onPressed: () {},
         child: Icon(Icons.add),
         tooltip: 'Agendar Cita',
       ),

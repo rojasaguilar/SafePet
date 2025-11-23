@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:safe_pet_client/pages/citas/Citas.dart';
+import 'package:safe_pet_client/pages/clinicas/Clinicas.dart';
+import 'package:safe_pet_client/pages/mascotas/Mascota.dart';
 import 'package:safe_pet_client/pages/welcome.dart';
-import 'Citas.dart';
-import 'Clinicas.dart';
-import 'Mascota.dart';
 
 void main() async {
 WidgetsFlutterBinding.ensureInitialized();

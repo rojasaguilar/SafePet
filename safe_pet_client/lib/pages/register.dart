@@ -35,12 +35,21 @@ class _RegisterState extends State<Register> {
             padding: EdgeInsets.all(30),
             child: Column(
               children: [
-                Text("Tu nueva cuenta empieza aquí", style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold
-                ),),
-                SizedBox(height: 6,),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      child: Icon(Icons.account_box, color: Colors.black,),
+                    ),
+                    SizedBox(width: 15,),
+                    Text("Tu nueva cuenta\nempieza aquí", style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold
+                    ),),
+                  ],
+                ),
+
+                SizedBox(height: 10,),
                 Text("Regístrate en pocos pasos y empieza a disfrutar de todo lo que SafePet tiene para ti.", style: TextStyle(
                   color: Colors.white,
                   fontSize: 16

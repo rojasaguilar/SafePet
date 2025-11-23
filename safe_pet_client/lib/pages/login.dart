@@ -33,6 +33,7 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login correcto vato: $token")),
       );
+      Navigator.push(context, MaterialPageRoute(builder: (x) => Home()));
     } catch (e) {
       print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,9 +130,6 @@ class _LoginState extends State<Login> {
             FilledButton(
               onPressed: (){
                 login();
-              //   Navigator.push(
-              //       context,
-              //       MaterialPageRoute(builder: (x)=>Home()));
               },
               child: Text("Iniciar sesión", style: TextStyle(
                   color: Colors.white,

@@ -94,7 +94,7 @@ class _WelcomeState extends State<Welcome> {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        "ó",
+                        "o",
                         style: TextStyle(
                           color: Colores.azulOscuro.withOpacity(0.6),
                           fontSize: 16,
