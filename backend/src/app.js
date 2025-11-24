@@ -1,5 +1,6 @@
 import express from "express";
 import morgan from "morgan";
+import cors from 'cors';
 import dotenv_conf from "./config/dotenv_conf.js";
 
 //ROUTERS
@@ -13,6 +14,8 @@ const app = express();
 //MIDDLEWARES GENERALES
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cors());
+
 
 //URL BASE
 const API_URL_BASE = dotenv_conf.API_URL_BASE;
