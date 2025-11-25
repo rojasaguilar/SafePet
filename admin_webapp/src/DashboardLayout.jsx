@@ -13,7 +13,7 @@ function DashboardLayout() {
           <main className="flex-1 flex flex-col gap-6">
             <Topbar />
             <section className="bg-white rounded-3xl shadow-sm p-6 h-full">
-              <h1 className="text-2xl font-semibold">Dashboard Content</h1>
+              {/* <h1 className="text-2xl font-semibold">Dashboard Content</h1> */}
               <Outlet/>
             </section>
           </main>
