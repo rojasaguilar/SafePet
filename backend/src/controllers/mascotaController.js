@@ -83,6 +83,7 @@ const getMascota = async (req, res) => {
       nombre: d.nombre,
       raza: d.raza,
       tipo: d.tipo,
+      ...d,
       fechaNacimiento: d.fechaNacimiento.toDate(),
       vet_id: d.vet_id ?? null,
     };
@@ -107,6 +108,8 @@ const createMascota = async (req, res) => {
       tipo: data.tipo,
       fechaNacimiento: new Date(data.fechaNacimiento),
       vet_id: data.vet_id ?? null,
+      peso: data.peso,
+      sexo: data.sexo
     };
 
     const ref = await mascotaCol.add(mascota);
