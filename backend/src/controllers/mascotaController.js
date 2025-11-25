@@ -15,19 +15,37 @@ const getMascotas = async (req, res) => {
 
     const snapshot = await ref.get();
 
-    const mascotas = snapshot.docs.map((doc) => {
-      const d = doc.data();
+    const mascotas = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const d = doc.data();
+        const duenoRef = db.collection('usuarios').doc(d.ui_dueno.id);
 
-      return {
-        id: doc.id,
-        ui_dueno: d.ui_dueno,
-        nombre: d.nombre,
-        raza: d.raza,
-        tipo: d.tipo,
-        fechaNacimiento: d.fechaNacimiento.toDate(),
-        vet_id: d.vet_id ?? null,
-      };
-    });
+        let vet;
+        if (d.vet_id) {
+          const vetRef = db.collection('usuarios').doc(d.vet_id.id);
+          const vetSnap = await vetRef.get();
+          vet = vetSnap.data();
+        }
+
+        const duenoSnap = await duenoRef.get();
+
+        const dueno = duenoSnap.data();
+
+        return {
+          id: doc.id,
+          ui_dueno: d.ui_dueno.id,
+          nombre_dueno: `${dueno.nombre} ${dueno.apellidos}`,
+          nombre: d.nombre,
+          raza: d.raza,
+          tipo: d.tipo,
+          sexo: d.sexo,
+          peso: d.peso,
+          fechaNacimiento: d.fechaNacimiento.toDate(),
+          vet_id: d.vet_id ?? null,
+          vet_nombre: vet?.nombre ?? null,
+        };
+      })
+    );
 
     return res.status(200).json({
       status: 'success',
