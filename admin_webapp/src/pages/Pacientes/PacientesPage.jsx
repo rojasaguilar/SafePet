@@ -8,7 +8,7 @@ function PacientesPage() {
   const navigate = useNavigate();
 
   const goToDetail = (id) => {
-    navigate(`/home/pacientes/${id}`,{
+    navigate(`/pacientes/${id}`,{
       state: {mascotaId: id}
     });
   };
@@ -30,9 +30,6 @@ function PacientesPage() {
       {mascotas.length > 0 ? (
         <div>
           {
-            // mascotas.map((mascota) => {
-
-            // })
             <table className="table-fixed">
               <thead>
                 <tr>
