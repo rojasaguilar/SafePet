@@ -12,11 +12,7 @@ const getUsers = async (req, res) => {
       const d = doc.data();
       return {
         uid: doc.id,
-        nombre: d.nombre,
-        apellidos: d.apellidos,
-        username: d.username,
-        email: d.email,
-        rol: d.rol,
+        ...d
       };
     });
 
@@ -82,6 +78,7 @@ const createUser = async (req, res) => {
         username: data.username || `${data.nombre}_${data.apellidos}`,
         email: data.email,
         rol: data.rol,
+        telefono: data.telefono
       };
 
       // Guardar en Firestore

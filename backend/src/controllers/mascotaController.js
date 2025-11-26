@@ -33,7 +33,7 @@ const getMascotas = async (req, res) => {
 
         return {
           id: doc.id,
-          ui_dueno: d.ui_dueno.id,
+          ui_dueno: duenoSnap.id,
           nombre_dueno: `${dueno.nombre} ${dueno.apellidos}`,
           nombre: d.nombre,
           raza: d.raza,
@@ -77,13 +77,17 @@ const getMascota = async (req, res) => {
 
     const d = snap.data();
 
+    const duenoRef = db.collection('usuarios').doc(d.ui_dueno.id);
+    const duenoSnap = await duenoRef.get();
+    const dueno = duenoSnap.data();
+
     const mascota = {
       id: snap.id,
-      ui_dueno: d.ui_dueno,
-      nombre: d.nombre,
-      raza: d.raza,
-      tipo: d.tipo,
       ...d,
+      ui_dueno: duenoSnap.id,
+      nombre_dueno: `${dueno.nombre} ${dueno.apellidos}`,
+      telefono_dueno: dueno.telefono,
+      correo_dueno: dueno.email,
       fechaNacimiento: d.fechaNacimiento.toDate(),
       vet_id: d.vet_id ?? null,
     };
@@ -109,7 +113,7 @@ const createMascota = async (req, res) => {
       fechaNacimiento: new Date(data.fechaNacimiento),
       vet_id: data.vet_id ?? null,
       peso: data.peso,
-      sexo: data.sexo
+      sexo: data.sexo,
     };
 
     const ref = await mascotaCol.add(mascota);
