@@ -8,8 +8,15 @@ const getCitas = async (req, res) => {
 
   // console.log(loggedUser)
   //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
-
   let query = citasCol;
+  const { mascotaId } = req.query;
+  console.log(mascotaId);
+
+  if (mascotaId) {
+    const mascotaRef = db.collection('mascotas').doc(mascotaId)
+    query = query.where('mascota_id', '==', mascotaRef);
+  }
+
   // if (req.queryObject) {
   //   query = query.where('mascota_id', '==', req.mascotaId);
   // }
@@ -87,7 +94,7 @@ const addCita = async (req, res) => {
   //REFERENCIAS
   const duenoRef = db.collection('usuarios').doc(data.ui_dueno);
   const mascotaRef = db.collection('mascotas').doc(data.mascota_id);
-  const vetRef = db.collection('usuario').doc(data.vet_id);
+  const vetRef = db.collection('usuarios').doc(data.vet_id);
   const clinicaRef = db.collection('clinicas').doc(data.clinica_id);
 
   const duenoSnapshot = await duenoRef.get();
