@@ -6,6 +6,7 @@ import Sexo from '../components/Sexo';
 import Peso from '../components/peso';
 import Tipo from '../components/tipo';
 import Edad from '../components/Edad';
+import CitasLista from '../components/PacienteComponents/CitasLista';
 
 function PacientePage() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function PacientePage() {
 
     getMascota();
   }, [id]);
-console.log(mascota.fechaNacimiento)
+  console.log(mascota.fechaNacimiento);
   //retroceder a pantalla anterior
   const goBack = () => navigate('/home/pacientes/');
 
@@ -55,18 +56,20 @@ console.log(mascota.fechaNacimiento)
             )}
           </div>
 
+          {/* NOMBRE MASCOTA */}
           <p className="text-2xl font-semibold">{capitalize(mascota.nombre)}</p>
+
+          {/* BANNER INFO */}
           <div className="bg-blue-200 p-8 rounded-xl grid grid-cols-4">
             <Sexo sexo={mascota.sexo} />
             <Peso peso={mascota.peso} />
-            <Tipo tipo={mascota.tipo}/>
-            <Edad fechaNacimiento={mascota.fechaNacimiento}/>
+            <Tipo tipo={mascota.tipo} />
+            <Edad fechaNacimiento={mascota.fechaNacimiento} />
           </div>
         </div>
         {/* TODAS LAS CITAS */}
-        <div>
-          <p>Citas</p>
-        </div>
+
+        <CitasLista />
       </div>
     </>
   );
