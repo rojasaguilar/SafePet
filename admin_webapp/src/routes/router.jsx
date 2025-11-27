@@ -5,12 +5,12 @@ import DashboardLayout from './../DashboardLayout.jsx';
 
 //PAGES
 import PacientesPage from './../pages/Pacientes/PacientesPage.jsx';
-import CitasPage from './../pages/citas/CitasPage.jsx';
+import CitasPage from './../pages/Citas/CitasPage.jsx';
 import VeterinariosPage from './../pages/Usuarios/VeterinariosPage.jsx';
 import ClinicasPage from './../pages/Clinicas/ClinicasPage.jsx';
 import PacientePage from '../pages/Pacientes/PacientePage.jsx';
 import CitaPage from './../pages/Citas/CitaPage.jsx';
-import UsuariosPage from './../pages/Usuarios/UsuariosPage.jsx  ';
+import UsuariosPage from './../pages/Usuarios/UsuariosPage.jsx';
 import UsuarioPage from '../pages/Usuarios/UsuarioPage.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 
