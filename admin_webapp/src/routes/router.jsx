@@ -1,23 +1,23 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 //LAYOUT
-import DashbouardLayout from './../DashboardLayout.jsx';
+import DashboardLayout from './../DashboardLayout.jsx';
 
 //PAGES
-import PacientesPage from './../pages/PacientesPage.jsx';
-import CitasPage from './../pages/CitasPage.jsx';
-import VeterinariosPage from './../pages/VeterinariosPage.jsx';
-import ClinicasPage from './../pages/ClinicasPage.jsx';
-import PacientePage from '../pages/PacientePage.jsx';
-import CitaPage from '../pages/CitaPage.jsx';
-import UsuariosPage from '../pages/UsuariosPage.jsx';
-import UsuarioPage from '../pages/UsuarioPage.jsx';
+import PacientesPage from './../pages/Pacientes/PacientesPage.jsx';
+import CitasPage from './../pages/citas/CitasPage.jsx';
+import VeterinariosPage from './../pages/Usuarios/VeterinariosPage.jsx';
+import ClinicasPage from './../pages/Clinicas/ClinicasPage.jsx';
+import PacientePage from '../pages/Pacientes/PacientePage.jsx';
+import CitaPage from './../pages/Citas/CitaPage.jsx';
+import UsuariosPage from './../pages/Usuarios/UsuariosPage.jsx  ';
+import UsuarioPage from '../pages/Usuarios/UsuarioPage.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <DashbouardLayout />,
+    element: <DashboardLayout />,
     children: [
       { path: 'dashboard', element: <Dashboard /> },
 

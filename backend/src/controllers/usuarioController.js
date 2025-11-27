@@ -5,14 +5,26 @@ import admin from 'firebase-admin';
 const usuariosCol = db.collection('usuarios');
 
 const getUsers = async (req, res) => {
+  let dbQuery = usuariosCol;
+
+  //VERIFICAR SI HAY FILTROS
+  const { query } = req;
+  
+  //SI HAY FILTROS, GENERA QUERY PARA FILTRAR
+  if (query) {
+    const filtros = Object.keys(query);
+    filtros.forEach(filtro => dbQuery = dbQuery.where(filtro, "==", query[filtro]))
+  }
+
+  
   try {
-    const snapshot = await usuariosCol.get();
+    const snapshot = await dbQuery.get();
 
     const usuarios = snapshot.docs.map((doc) => {
       const d = doc.data();
       return {
         uid: doc.id,
-        ...d
+        ...d,
       };
     });
 
@@ -78,7 +90,7 @@ const createUser = async (req, res) => {
         username: data.username || `${data.nombre}_${data.apellidos}`,
         email: data.email,
         rol: data.rol,
-        telefono: data.telefono
+        telefono: data.telefono,
       };
 
       // Guardar en Firestore
