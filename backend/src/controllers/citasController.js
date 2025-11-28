@@ -9,12 +9,17 @@ const getCitas = async (req, res) => {
   // console.log(loggedUser)
   //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
   let query = citasCol;
-  const { mascotaId } = req.query;
+  const { mascotaId,uid } = req.query;
   console.log(mascotaId);
 
   if (mascotaId) {
     const mascotaRef = db.collection('mascotas').doc(mascotaId)
     query = query.where('mascota_id', '==', mascotaRef);
+  }
+
+    if (uid) {
+    const usuarioRef = db.collection('usuarios').doc(uid)
+    query = query.where('ui_dueno', '==', usuarioRef);
   }
 
   // if (req.queryObject) {
@@ -30,6 +35,7 @@ const getCitas = async (req, res) => {
       return {
         cita_id: doc.id,
         mascota_id: d.mascota_id,
+        ui_dueno: d.ui_dueno,
         vet_id: d.vet_id,
         clinica_id: d.clinica_id,
         fechaProgramada: d.fechaProgramada.toDate(),

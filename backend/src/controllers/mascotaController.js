@@ -6,14 +6,19 @@ const mascotaCol = db.collection('mascotas');
 
 const getMascotas = async (req, res) => {
   try {
-    let ref = mascotaCol;
+    let query = mascotaCol;
+
+    const { ui_dueno } = req.query;
+    console.log(ui_dueno);
 
     // Si viene ?ui_dueno=xxxxx
-    if (req.query.ui_dueno) {
-      ref = ref.where('ui_dueno', '==', req.query.ui_dueno);
+    if (ui_dueno) {
+      const duenoRef = db.collection('usuarios').doc(ui_dueno);
+
+      query = query.where('ui_dueno', '==', duenoRef);
     }
 
-    const snapshot = await ref.get();
+    const snapshot = await query.get();
 
     const mascotas = await Promise.all(
       snapshot.docs.map(async (doc) => {

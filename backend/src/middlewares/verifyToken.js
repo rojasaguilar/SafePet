@@ -8,7 +8,7 @@ export const verifyUserToken = async (req, res, next) => {
   try {
     const user = await admin.auth().verifyIdToken(token);
     if (!user) {
-      return res.status(400).json({
+      return res.status(401).json({
         error,
         message: 'token invalido',
       });

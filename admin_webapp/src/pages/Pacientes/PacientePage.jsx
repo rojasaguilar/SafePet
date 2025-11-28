@@ -32,7 +32,7 @@ function PacientePage() {
 
     getMascota();
   }, [id]);
-  console.log(mascota.fechaNacimiento);
+  
   //retroceder a pantalla anterior
   const goBack = () => navigate('/pacientes');
 
@@ -49,11 +49,11 @@ function PacientePage() {
         <div className="flex flex-col gap-5">
           {/* FOTO PERFIL */}
           <div className="w-full h-38 bg-amber-500 flex justify-start items-end rounded-3xl">
-            {mascota.tipo === 'gato' ? (
-              <img src="/src/assets/cat.jpg" alt="d" className="w-25 h-25 rounded-full relative left-10 top-2" />
-            ) : (
-              <img src="/src/assets/dog.jpg" alt="d" className="w-20 h-20 rounded-full relative bottom-0 " />
-            )}
+            <img
+              src={`/src/assets/${mascota.tipo}.jpg`}
+              alt=""
+              className="w-25 h-25 rounded-full relative left-10 top-2"
+            />
           </div>
 
           {/* NOMBRE MASCOTA */}
@@ -108,7 +108,7 @@ function PacientePage() {
         </div>
         {/* TODAS LAS CITAS */}
 
-        <CitasLista />
+        <CitasLista url={`${import.meta.env.VITE_BACKEND_URL_BASE}/citas?mascotaId=${id}`} />
       </div>
     </>
   );
