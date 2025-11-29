@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:safe_pet_client/pages/mascotas/mascotas_crear_editar.dart';
+import 'package:safe_pet_client/pages/mascotas/actualizarMascota.dart';
+import 'package:safe_pet_client/pages/mascotas/crearMascota.dart';
 import 'package:safe_pet_client/theme.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -137,15 +138,12 @@ class _MascotasScreenState extends State<PantallaMascotas> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  "assets/mascotas-principal.jpg",
-                  width: double.infinity,
-                  height: 200,
+                child: Image.asset("assets/mascotas-principal.jpg",
+                  width: double.infinity, height: 200,
                   fit: BoxFit.cover,
                 ),
               ),
-              Text(
-                "Consulta la información de tus mascotas",
+              Text("Consulta la información\nde tus mascotas",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -163,34 +161,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
             ],
           ),
         ),
-        SizedBox(
-          height: 10,
-        ),
-        FilledButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (x) => mascotas_crear_editar()));
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.add,
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Text(
-                "Agregar Mascota",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )
-            ],
-          ),
-          style: FilledButton.styleFrom(backgroundColor: Colors.black),
-        ),
-        SizedBox(
-          height: 10,
-        ),
+
         Expanded(
           child: ListView.builder(
             itemCount: mascotas.length,
@@ -234,7 +205,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (x) =>
-                                            mascotas_crear_editar()));
+                                            ActualizarMascota()));
                               } else if (value == 'eliminar') {
                                 showDialog(
                                     context: context,
@@ -253,8 +224,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                             Icon(Icons.warning_amber_rounded,
                                                 color: Colors.red, size: 48),
                                             SizedBox(height: 10),
-                                            Text(
-                                              "¿Eliminar mascota?",
+                                            Text("¿Eliminar mascota?",
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 fontSize: 20,
@@ -262,8 +232,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                               ),
                                             ),
                                             SizedBox(height: 8),
-                                            Text(
-                                              "Esta acción no se puede deshacer.",
+                                            Text("Esta acción no se puede deshacer.",
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 fontSize: 15,
@@ -293,8 +262,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                                   padding: EdgeInsets.symmetric(
                                                       vertical: 14),
                                                   alignment: Alignment.center,
-                                                  child: Text(
-                                                    "Eliminar",
+                                                  child: Text("Eliminar",
                                                     style: TextStyle(
                                                       color: Colors.red,
                                                       fontSize: 17,
@@ -316,8 +284,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                                   padding: EdgeInsets.symmetric(
                                                       vertical: 14),
                                                   alignment: Alignment.center,
-                                                  child: Text(
-                                                    "Cancelar",
+                                                  child: Text("Cancelar",
                                                     style: TextStyle(
                                                       color: Colors.black87,
                                                       fontSize: 17,
@@ -345,8 +312,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                         SizedBox(
                                           width: 8,
                                         ),
-                                        Text(
-                                          "Editar",
+                                        Text("Editar",
                                           style: TextStyle(color: Colors.black),
                                         )
                                       ],
@@ -366,7 +332,9 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                       Text("Eliminar",
                                           style: TextStyle(
                                               color: Colors.red,
-                                              fontWeight: FontWeight.bold))
+                                              fontWeight: FontWeight.bold
+                                          )
+                                      )
                                     ],
                                   ),
                                 ),
@@ -375,29 +343,30 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                           ),
                         ],
                       ),
-                      Divider(height: 25, thickness: 1),
+
+                      SizedBox(height: 6),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.category,
+                              Icon(Icons.pets_outlined,
                                   size: 22, color: Colors.grey[700]),
                               SizedBox(width: 8),
-                              Text(
-                                "Tipo: ${mascota['tipo']}",
+                              Text("Raza: ${mascota['raza']}",
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.grey[800]),
                               ),
                             ],
                           ),
+
                           Row(
                             children: [
-                              Icon(Icons.pets_outlined,
+                              Icon(Icons.category,
                                   size: 22, color: Colors.grey[700]),
                               SizedBox(width: 8),
-                              Text(
-                                "Raza: ${mascota['raza']}",
+                              Text("Tipo: ${mascota['tipo']}",
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.grey[800]),
                               ),
@@ -405,13 +374,12 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 6),
+                      Divider(height: 25, thickness: 1),
                       Row(
                         children: [
                           Icon(Icons.person, size: 22, color: Colors.grey[700]),
                           SizedBox(width: 8),
-                          Text(
-                            "Dueño: ${mascota['dueño']}",
+                          Text("Dueño: ${mascota['dueño']}",
                             style: TextStyle(
                                 fontSize: 16, color: Colors.grey[800]),
                           ),
@@ -423,8 +391,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                           Icon(Icons.calendar_today,
                               size: 22, color: Colors.grey[700]),
                           SizedBox(width: 8),
-                          Text(
-                            "Nacimiento: ${mascota['fecha']}",
+                          Text("Nacimiento: ${mascota['fecha']}",
                             style: TextStyle(
                                 fontSize: 16, color: Colors.grey[800]),
                           ),
@@ -436,8 +403,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                           Icon(Icons.local_hospital,
                               size: 22, color: Colors.grey[700]),
                           SizedBox(width: 8),
-                          Text(
-                            "Veterinario: ${mascota['veterinario']}",
+                          Text("Veterinario: ${mascota['veterinario']}",
                             style: TextStyle(
                                 fontSize: 16, color: Colors.grey[800]),
                           ),
@@ -453,8 +419,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                 Icons.calendar_month,
                                 color: Colors.white,
                               ),
-                              label: Text(
-                                "Citas",
+                              label: Text("Citas",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),
@@ -476,8 +441,7 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                                 Icons.add,
                                 color: Colors.white,
                               ),
-                              label: Text(
-                                "Agendar",
+                              label: Text("Agendar",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),
@@ -500,7 +464,25 @@ class _MascotasScreenState extends State<PantallaMascotas> {
             },
           ),
         ),
+
+        SizedBox(height: 50,),
       ],
-    ));
+    ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (x) => crearmascota()));
+        },
+        label: Text("Crear",
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+          ),
+        ),
+        icon: Image.asset("assets/dog.png",
+          width: 30, height: 30,
+        ),
+        backgroundColor: Colores.azulOscuro,
+      ),
+    );
   }
 }

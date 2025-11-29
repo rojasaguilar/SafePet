@@ -19,7 +19,7 @@ class _HomeState extends State<Home> {
     "Inicio",
     "Mascotas",
     "Citas",
-    "Clínicas"
+    "Clínicas Veterinarias"
   ];
 
   @override
@@ -497,7 +497,7 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.zero,
             ),
             decoration: BoxDecoration(
-              color: Colores.azulSecundario.withOpacity(0.6),
+              color: Colores.azulSecundario,
               borderRadius: BorderRadius.circular(24),
             ),
           )
