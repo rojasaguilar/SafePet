@@ -1,32 +1,59 @@
 import admin from 'firebase-admin';
 import { db } from '../config/firebase.js';
+
 export const verifyUserToken = async (req, res, next) => {
-  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
-  const { token } = req.body;
-  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+  //OBTENER TOKEN DE HEADER
+  const { authorization } = req.headers;
+
+  if (!authorization)
+    return res.status(401).json({
+      message: 'Tienes que iniciar sesión',
+    });
+
+  const token = authorization.replace('Bearer ', '');
+
+  // console.log(token);
 
   try {
-    const user = await admin.auth().verifyIdToken(token);
-    if (!user) {
-      return res.status(401).json({
-        error,
-        message: 'token invalido',
-      });
-    }
+    const tokenVerified = await admin.auth().verifyIdToken(token, true);
+
+    console.log(tokenVerified.uid)
 
     const usuariosCol = db.collection('usuarios');
 
-    const ref = usuariosCol.doc(user.uid);
+    const ref = usuariosCol.doc(tokenVerified.uid);
     const snap = await ref.get();
 
+    if (!snap.exists) {
+      return res.status(401).json({
+        message: 'Usuario no encontrado',
+      });
+    }
+
     req.loggedUser = {
-      uid: user.uid,
+      uid: ref,
       ...snap.data(),
     };
+
     next();
   } catch (error) {
+    // Token revocado
+    if (error.code === 'auth/id-token-revoked') {
+      return res.status(401).json({
+        message: 'Sesión expirada. Inicia sesión de nuevo.',
+      });
+    }
+
+    // Token inválido o manipulado
+    if (error.code === 'auth/argument-error') {
+      return res.status(401).json({
+        message: 'Token inválido.',
+      });
+    }
+
     return res.status(500).json({
-      error,
+      message: 'Error verificando token.',
+      error: error.message,
     });
   }
 };

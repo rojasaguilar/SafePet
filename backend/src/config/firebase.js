@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import admin from 'firebase-admin';
 // import { getAuth } from "firebase/auth";
-import { getAuth } from 'firebase-admin/auth';
+
 
 //FIRESTORE
 // import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
@@ -9,7 +9,7 @@ import { getAuth } from 'firebase-admin/auth';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-import dotenv_conf from './dotenv_conf.js';
+
 let firebaseApp;
 if (!admin.apps.length) {
   firebaseApp = admin.initializeApp({

@@ -5,11 +5,20 @@ import admin from 'firebase-admin';
 const mascotaCol = db.collection('mascotas');
 
 const getMascotas = async (req, res) => {
-  try {
-    let query = mascotaCol;
+  //ANALIZA DE QUIEN VIENE LA PETICION (TOKEN)
+  const { loggedUser } = req;
+  const {app} = req.headers;
 
-    const { ui_dueno } = req.query;
-    console.log(ui_dueno);
+  //VERIFICA PARA FILTRO DE DUENO
+  const { ui_dueno } = req.query;
+
+  let query = mascotaCol;
+
+  try {
+    if (app === 'client-movile') {
+     console.log(loggedUser)
+      query = query.where('ui_dueno', '==', loggedUser.uid);
+    }
 
     // Si viene ?ui_dueno=xxxxx
     if (ui_dueno) {
