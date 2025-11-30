@@ -7,26 +7,32 @@ const mascotaCol = db.collection('mascotas');
 const getMascotas = async (req, res) => {
   //ANALIZA DE QUIEN VIENE LA PETICION (TOKEN)
   const { loggedUser } = req;
-  const {app} = req.headers;
+  const { app } = req.headers;
 
   //VERIFICA PARA FILTRO DE DUENO
-  const { ui_dueno } = req.query;
+  const { ui_dueno, tipo } = req.query;
 
   let query = mascotaCol;
 
+  if (app === 'client-movile') {
+    console.log(loggedUser);
+    query = query.where('ui_dueno', '==', loggedUser.uid);
+  }
+
+  // Si viene ?ui_dueno=xxxxx
+  if (ui_dueno) {
+    const duenoRef = db.collection('usuarios').doc(ui_dueno);
+
+    query = query.where('ui_dueno', '==', duenoRef);
+  }
+
+  if (tipo) {
+    console.log(tipo);
+    query = query.where('tipo', '==', tipo);
+    //  console.log(query.)
+  }
+
   try {
-    if (app === 'client-movile') {
-     console.log(loggedUser)
-      query = query.where('ui_dueno', '==', loggedUser.uid);
-    }
-
-    // Si viene ?ui_dueno=xxxxx
-    if (ui_dueno) {
-      const duenoRef = db.collection('usuarios').doc(ui_dueno);
-
-      query = query.where('ui_dueno', '==', duenoRef);
-    }
-
     const snapshot = await query.get();
 
     const mascotas = await Promise.all(
@@ -48,12 +54,8 @@ const getMascotas = async (req, res) => {
         return {
           id: doc.id,
           ui_dueno: duenoSnap.id,
+          ...d,
           nombre_dueno: `${dueno.nombre} ${dueno.apellidos}`,
-          nombre: d.nombre,
-          raza: d.raza,
-          tipo: d.tipo,
-          sexo: d.sexo,
-          peso: d.peso,
           fechaNacimiento: d.fechaNacimiento.toDate(),
           vet_id: d.vet_id ?? null,
           vet_nombre: vet?.nombre ?? null,
@@ -128,6 +130,7 @@ const createMascota = async (req, res) => {
       vet_id: data.vet_id ?? null,
       peso: data.peso,
       sexo: data.sexo,
+
     };
 
     const ref = await mascotaCol.add(mascota);

@@ -9,16 +9,16 @@ const getCitas = async (req, res) => {
   // console.log(loggedUser)
   //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
   let query = citasCol;
-  const { mascotaId,uid } = req.query;
+  const { mascotaId, uid } = req.query;
   console.log(mascotaId);
 
   if (mascotaId) {
-    const mascotaRef = db.collection('mascotas').doc(mascotaId)
+    const mascotaRef = db.collection('mascotas').doc(mascotaId);
     query = query.where('mascota_id', '==', mascotaRef);
   }
 
-    if (uid) {
-    const usuarioRef = db.collection('usuarios').doc(uid)
+  if (uid) {
+    const usuarioRef = db.collection('usuarios').doc(uid);
     query = query.where('ui_dueno', '==', usuarioRef);
   }
 
@@ -29,20 +29,36 @@ const getCitas = async (req, res) => {
   try {
     const snapshot = await query.get();
 
-    const citas = snapshot.docs.map((doc) => {
-      const d = doc.data();
+    const citas = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const d = doc.data();
 
-      return {
-        cita_id: doc.id,
-        mascota_id: d.mascota_id,
-        ui_dueno: d.ui_dueno,
-        vet_id: d.vet_id,
-        clinica_id: d.clinica_id,
-        fechaProgramada: d.fechaProgramada.toDate(),
-        asistencia: d.asistencia,
-        fechaCrecion: d.fechaCreacion.toDate(),
-      };
-    });
+        const vetRef = db.collection('usuarios').doc(d.vet_id.id);
+
+        const vet = await vetRef.get();
+        const vetData = vet.data();
+
+        const fecha = new Date(d.fechaProgramada.toDate());
+        const dia = fecha.toLocaleString('es-ES', {
+          day: '2-digit',
+        });
+
+        const mes = fecha.toLocaleString('es-ES', {
+          month: 'long',
+        });
+
+        const hora = fecha.toLocaleTimeString("en-US", {timeStyle:'short'});
+
+        return {
+          cita_id: doc.id,
+          ...d,
+          vet_nombre: `${vetData.nombre} ${vetData.apellidos}`,
+          fechaProgramada: `${dia} de ${mes} del ${fecha.getFullYear()}`,
+          hora,
+          fechaCreacion: d.fechaCreacion.toDate(),
+        };
+      })
+    );
 
     return res.status(200).json({
       status: 'success',

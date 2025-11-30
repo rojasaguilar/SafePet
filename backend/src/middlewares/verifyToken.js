@@ -17,7 +17,7 @@ export const verifyUserToken = async (req, res, next) => {
   try {
     const tokenVerified = await admin.auth().verifyIdToken(token, true);
 
-    console.log(tokenVerified.uid)
+    console.log(tokenVerified.uid);
 
     const usuariosCol = db.collection('usuarios');
 

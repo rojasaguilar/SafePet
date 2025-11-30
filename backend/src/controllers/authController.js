@@ -70,7 +70,9 @@ const login = async (req, res) => {
 const logOut = async (req, res) => {
   const { loggedUser } = req;
   try {
-    await admin.auth().revokeRefreshTokens(loggedUser.uid);
+    console.log(" ======================= ")
+    console.log(loggedUser.uid.id);
+    await admin.auth().revokeRefreshTokens(loggedUser.uid.id);
 
     return res.status(200).json({
       message: 'Sesión cerrada',
