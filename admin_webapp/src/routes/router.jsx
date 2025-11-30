@@ -23,6 +23,7 @@ import UsuarioPage from '../pages/Usuarios/UsuarioPage.jsx';
 
 // Clínicas
 import ClinicasPage from './../pages/Clinicas/ClinicasPage.jsx';
+import AgregarCita from '../pages/Citas/AgregarCita.jsx';
 
 const router = createBrowserRouter([
   { path: '/landing', element: <LandingPage /> },
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
       // CITAS
       { path: 'citas', element: <CitasPage /> },
       { path: 'citas/:id', element: <CitaPage /> },
+      { path: 'citas/nueva', element: <AgregarCita /> },
 
       // USUARIOS
       { path: 'veterinarios', element: <VeterinariosPage /> },

@@ -7,10 +7,21 @@ const getClinicas = async (req, res) => {
   try {
     const snapshot = await clinicasCol.get();
 
-    const clinicas = snapshot.docs.map((doc) => ({
-      clinica_id: doc.id,
-      ...doc.data(),
-    }));
+    const clinicas = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const clinicaData = doc.data();
+
+        const encargadoRef = db.collection('usuarios').doc(clinicaData.encargado.id);
+        const encargado = await encargadoRef.get();
+        const encargadoData = encargado.data();
+
+        return {
+          clinica_id: doc.id,
+          ...clinicaData,
+          encargado: `${encargadoData.nombre} ${encargadoData.apellidos}`,
+        };
+      })
+    );
 
     return res.status(200).json({
       status: 'success',

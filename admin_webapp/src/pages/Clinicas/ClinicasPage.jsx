@@ -71,6 +71,8 @@ function ClinicasPage() {
     }
   };
 
+  console.log(clinicas);
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans p-6 pb-12">
       {/* --- HEADER --- */}
@@ -109,10 +111,11 @@ function ClinicasPage() {
           </div>
           <div>
             <p className="text-slate-500 text-xs font-bold uppercase">Operando</p>
-            <p className="text-2xl font-bold text-slate-800">{clinicas.filter((c) => c.estado === 'abierto').length}</p>
+            <p className="text-2xl font-bold text-slate-800">{clinicas.filter((c) => c.estado === 'activo').length}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+        {/* ESPACIO DISPONIBLE */}
+        {/* <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
           <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
             <Stethoscope size={24} />
           </div>
@@ -122,7 +125,7 @@ function ClinicasPage() {
               {clinicas.reduce((acc, curr) => acc + (curr.veterinarios || 0), 0)}
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* --- BARRA DE HERRAMIENTAS --- */}
@@ -158,6 +161,7 @@ function ClinicasPage() {
             <div
               key={clinica.id}
               className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all group flex flex-col md:flex-row gap-6 items-start md:items-center"
+              onClick={() => navigate(`/clinicas/${clinica.clinica_id}`)}
             >
               {/* Icono / Imagen */}
               <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 flex-shrink-0">
@@ -170,7 +174,7 @@ function ClinicasPage() {
                   <h3 className="text-lg font-bold text-slate-800 truncate">{clinica.nombre}</h3>
                   {getStatusBadge(clinica.estado)}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 text-sm text-slate-500 mt-2">
+                <div className="flex flex-col sm:flex-row gap-4 text-sm text-slate-500 mt-2 items-start">
                   <span className="flex items-center gap-1.5">
                     <MapPin size={14} /> {clinica.direccion}
                   </span>
@@ -188,15 +192,15 @@ function ClinicasPage() {
                   </p>
                   <p className="text-sm font-medium text-slate-700">{clinica.horario}</p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-xs text-slate-400 font-bold uppercase mb-1 flex items-center gap-1">
                     <Users size={12} /> Personal
                   </p>
                   <p className="text-sm font-medium text-slate-700">{clinica.veterinarios} Veterinarios</p>
-                </div>
+                </div> */}
                 <div className="hidden lg:block">
                   <p className="text-xs text-slate-400 font-bold uppercase mb-1">Encargado</p>
-                  <p className="text-sm font-medium text-slate-700">{clinica.encargado.nombre}</p>
+                  <p className="text-sm font-medium text-slate-700">{clinica.encargado}</p>
                 </div>
               </div>
 

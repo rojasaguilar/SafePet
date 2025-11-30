@@ -15,6 +15,9 @@ router
   .get(citasController.getCitas)
   .post(citasController.addCita);
 
-router.route('/:id').get(citasController.getCita);
+router
+  .route('/:id')
+  .get(citasController.getCita)
+  .patch(citasController.updateCita);
 
 export default router;
