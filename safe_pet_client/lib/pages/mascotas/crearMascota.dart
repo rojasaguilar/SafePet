@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:safe_pet_client/theme.dart';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:safe_pet_client/config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class crearmascota extends StatefulWidget {
   const crearmascota({super.key});
 
@@ -12,23 +17,114 @@ class _crearmascotaState extends State<crearmascota> {
   final nombre = TextEditingController();
   final raza = TextEditingController();
   final fecha = TextEditingController();
+  final peso = TextEditingController();
 
-  int? duenoSeleccionado;
   String? tipoSeleccionado;
-  int? vetSeleccionado;
+  String? sexoSeleccionado;
+  String? vetSeleccionado;
+
+  List<Map<String, dynamic>> veterinarios = [];
+
+  @override
+  void initState() {
+    super.initState();
+    cargarVeterinarios();
+  }
+
+  Future<void> cargarVeterinarios() async {
+    try {
+      final url = Uri.parse("${Config.backendUrl}/usuarios?rol=veterinario");
+      final resp = await http.get(url);
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        setState(() {
+          veterinarios = List<Map<String, dynamic>>.from(data['data']);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al cargar veterinarios")),
+        );
+      }
+    } catch (e) {
+      print("Error cargando veterinarios: $e");
+    }
+  }
 
   InputDecoration deco(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(
-          color: Colors.black
-      ),
+      labelStyle: TextStyle(color: Colors.black),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       prefixIcon: Icon(icon, color: Colors.black87),
     );
+  }
+
+  Future<void> guardarMascota() async {
+    if (nombre.text.isEmpty ||
+        raza.text.isEmpty ||
+        peso.text.isEmpty ||
+        fecha.text.isEmpty ||
+        tipoSeleccionado == null ||
+        sexoSeleccionado == null ||
+        vetSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Completa todos los campos")),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Usuario no autenticado")),
+      );
+      return;
+    }
+
+    final url = Uri.parse("${Config.backendUrl}/mascotas");
+
+    List<String> partesFecha = fecha.text.split('/');
+    String fechaISO = "${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}";
+
+    final body = {
+      "ui_dueno": user.uid,
+      "nombre": nombre.text,
+      "raza": raza.text,
+      "tipo": tipoSeleccionado,
+      "sexo": sexoSeleccionado,
+      "peso": peso.text,
+      "fechaNacimiento": fechaISO,
+      "vet_id": vetSeleccionado,
+    };
+
+    try {
+      final resp = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Mascota registrada correctamente")),
+        );
+        Navigator.pop(context, true);
+      } else {
+        print("Error ${resp.statusCode}: ${resp.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al guardar mascota")),
+        );
+      }
+    } catch (e) {
+      print("Excepción: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error de conexión")),
+      );
+    }
   }
 
   @override
@@ -61,9 +157,7 @@ class _crearmascotaState extends State<crearmascota> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   SizedBox(width: 16,),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -123,9 +217,7 @@ class _crearmascotaState extends State<crearmascota> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 12,),
-
                     TextField(
                       controller: nombre,
                       decoration: deco("Nombre de la mascota", Icons.pets),
@@ -136,8 +228,8 @@ class _crearmascotaState extends State<crearmascota> {
                     DropdownButtonFormField<String>(
                       value: tipoSeleccionado,
                       items: [
-                        DropdownMenuItem(value: "Gato", child: Text("Gato")),
                         DropdownMenuItem(value: "Perro", child: Text("Perro")),
+                        DropdownMenuItem(value: "Gato", child: Text("Gato")),
                       ],
                       onChanged: (v) => setState(() => tipoSeleccionado = v),
                       decoration: deco("Tipo", Icons.category),
@@ -152,11 +244,40 @@ class _crearmascotaState extends State<crearmascota> {
 
                     SizedBox(height: 20),
 
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: peso,
+                            decoration: deco("Peso", Icons.monitor_weight),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: sexoSeleccionado,
+                            items: [
+                              DropdownMenuItem(value: "Macho", child: Text("Macho")),
+                              DropdownMenuItem(value: "Hembra", child: Text("Hembra")),
+                            ],
+                            onChanged: (v) => setState(() => sexoSeleccionado = v),
+                            decoration: deco("Sexo", Icons.male),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20),
+
                     TextField(
                       controller: fecha,
                       readOnly: true,
-                      decoration: deco("Fecha de nacimiento", Icons.cake).copyWith(
-                        suffixIcon: Icon(Icons.calendar_today, color: Colors.black),
+                      decoration: deco("Fecha de nacimiento", Icons.cake)
+                          .copyWith(
+                        suffixIcon:
+                        Icon(Icons.calendar_today, color: Colors.black),
                       ),
                       onTap: () async {
                         DateTime? f = await showDatePicker(
@@ -164,15 +285,12 @@ class _crearmascotaState extends State<crearmascota> {
                           initialDate: DateTime(2020),
                           firstDate: DateTime(2000),
                           lastDate: DateTime.now(),
-
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
                                 colorScheme: ColorScheme.light(
                                     primary: Colores.azulPrimario,
-                                    onPrimary: Colors.white
-                                ),
-
+                                    onPrimary: Colors.white),
                                 textButtonTheme: TextButtonThemeData(
                                   style: TextButton.styleFrom(
                                     foregroundColor: Colores.azulPrimario,
@@ -185,7 +303,8 @@ class _crearmascotaState extends State<crearmascota> {
                         );
 
                         if (f != null) {
-                          fecha.text = "${f.day.toString().padLeft(2, '0')}/${f.month.toString().padLeft(2, '0')}/${f.year}";
+                          fecha.text =
+                          "${f.day.toString().padLeft(2, '0')}/${f.month.toString().padLeft(2, '0')}/${f.year}";
                         }
                       },
                     ),
@@ -211,21 +330,20 @@ class _crearmascotaState extends State<crearmascota> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 12,),
-
-                    DropdownButtonFormField<int>(
+                    DropdownButtonFormField<String>(
                       value: vetSeleccionado,
-                      items: [
-                        DropdownMenuItem(value: 1, child: Text("chuy")),
-                        DropdownMenuItem(value: 2, child: Text("grapas")),
-                      ],
-                      onChanged: (v) => setState(() => vetSeleccionado = v),
+                      items: veterinarios.map((vet) {
+                        return DropdownMenuItem<String>(
+                          value: vet['uid'],
+                          child: Text("${vet['nombre']} ${vet['apellidos']}"),
+                        );
+                      }).toList(),
+                      onChanged: (v) =>
+                          setState(() => vetSeleccionado = v),
                       decoration: deco("Veterinario", Icons.local_hospital),
                     ),
-
                     SizedBox(height: 20),
-
                     Row(
                       children: [
                         Expanded(
@@ -243,12 +361,10 @@ class _crearmascotaState extends State<crearmascota> {
                               )
                           ),
                         ),
-
                         SizedBox(width: 16),
-
                         Expanded(
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: guardarMascota,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colores.azulPrimario,
                               ),
@@ -265,8 +381,7 @@ class _crearmascotaState extends State<crearmascota> {
                                       )
                                   ),
                                 ],
-                              )
-                          ),
+                              )),
                         ),
                       ],
                     ),

@@ -181,7 +181,7 @@ class _PantallaClinicasState extends State<PantallaClinicas> {
             ],
           ),
 
-          SizedBox(height: 12,)
+          SizedBox(height: 16,)
         ],
       ),
     );

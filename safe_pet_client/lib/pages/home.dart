@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:safe_pet_client/config.dart';
 import 'package:safe_pet_client/pages/citas/Citas.dart';
 import 'package:safe_pet_client/pages/clinicas/Clinicas.dart';
 import 'package:safe_pet_client/pages/mascotas/Mascota.dart';
@@ -14,6 +18,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _indice = 0;
+  List<Map<String, dynamic>> mascotas = [];
+
+  final String apiMascotasUrl = "${Config.backendUrl}/mascotas";
 
   final List<String> _titulos = [
     "Inicio",
@@ -23,6 +30,74 @@ class _HomeState extends State<Home> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    ObtenerMascotas();
+  }
+
+  Future<void> ObtenerMascotas() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("Usuario no autenticado");
+        return;
+      }
+
+      final idToken = await user.getIdToken();
+
+      final url = Uri.parse("$apiMascotasUrl");
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'app': 'client-movile',
+          'Authorization': 'Bearer $idToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final List data = body["data"];
+
+        setState(() {
+          mascotas = data.map<Map<String, dynamic>>((m) {
+            String fechaFormateada = '';
+            if (m['fechaNacimiento'] != null) {
+              try {
+                DateTime fecha = DateTime.parse(m['fechaNacimiento']);
+                fechaFormateada = "${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}";
+              } catch (e) {
+                fechaFormateada = m['fechaNacimiento'].toString();
+              }
+            }
+
+            String imagen = "assets/avatar-perro.jpg";
+            String tipo = (m['tipo'] ?? '').toString().toLowerCase();
+
+            if (tipo == 'gato') {
+              imagen = "assets/avatar-gato.jpg";
+            } else if (tipo == 'perro') {
+              imagen = "assets/avatar-perro.jpg";
+            }
+
+            return {
+              'nombre': m['nombre'] ?? 'Sin nombre',
+              'raza': m['raza'] ?? 'Sin raza',
+              'fecha': fechaFormateada,
+              'tipo': m['tipo'] ?? '',
+              'imagen': imagen,
+            };
+          }).toList();
+        });
+      } else {
+        print("Error del servidor: ${response.statusCode}");
+        print("Respuesta: ${response.body}");
+      }
+    } catch (e) {
+      print("Error al conectar con backend: $e");
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -85,8 +160,19 @@ class _HomeState extends State<Home> {
                                   Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
 
                                   InkWell(
-                                    onTap: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (x) => Welcome()));
+                                    onTap: () async {
+                                      try {
+                                        await FirebaseAuth.instance.signOut();
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (x) => Welcome())
+                                        );
+                                      } catch (e) {
+                                        print("Error al cerrar sesión: $e");
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("Error al cerrar sesión")),
+                                        );
+                                      }
                                     },
                                     child: Container(
                                       width: double.infinity,
@@ -144,12 +230,17 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      
+
       body: contenido(),
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _indice,
-        onTap: (index) => setState(() => _indice = index),
+        onTap: (index) {
+          setState(() => _indice = index);
+          if (index == 0) {
+            ObtenerMascotas();
+          }
+        },
         items:  [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -188,23 +279,35 @@ class _HomeState extends State<Home> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             SizedBox(height: 15),
 
-            tarjetaMascota(
-              nombre: "Nombre Mascota",
-              raza: "Border Collie",
-              fecha: "15-08-2025",
-              imagen: "assets/avatar-perro.jpg",
-            ),
-
-            SizedBox(height: 20),
-
-            tarjetaMascota(
-              nombre: "Nombre Mascota",
-              raza: "Gris",
-              fecha: "15-08-2021",
-              imagen: "assets/avatar-gato.jpg",
-            ),
+            if (mascotas.isEmpty)
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Icon(Icons.pets, size: 60, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text("No tienes mascotas registradas",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...mascotas.take(2).map((mascota) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: tarjetaMascota(
+                    nombre: mascota['nombre']!,
+                    raza: mascota['raza']!,
+                    fecha: mascota['fecha']!,
+                    imagen: mascota['imagen']!,
+                  ),
+                );
+              }).toList(),
 
             SizedBox(height: 20),
 

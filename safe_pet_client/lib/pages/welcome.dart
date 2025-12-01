@@ -79,7 +79,7 @@ class _WelcomeState extends State<Welcome> {
                       ),),
                       style: FilledButton.styleFrom(
                           padding: EdgeInsets.symmetric(horizontal: 85, vertical: 12),
-                          backgroundColor: Colores.azulSecundario
+                          backgroundColor: Colores.azulPrimario
                       ),
                   ),
 

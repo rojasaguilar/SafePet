@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:safe_pet_client/theme.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:safe_pet_client/config.dart';
 
 class ActualizarMascota extends StatefulWidget {
-  const ActualizarMascota({super.key});
+  final String mascotaId;
+  const ActualizarMascota({super.key, required this.mascotaId});
 
   @override
   State<ActualizarMascota> createState() => _ActualizarMascotaState();
@@ -12,17 +16,156 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
   final nombre = TextEditingController();
   final raza = TextEditingController();
   final fecha = TextEditingController();
+  final peso = TextEditingController();
 
-  int? duenoSeleccionado;
   String? tipoSeleccionado;
-  int? vetSeleccionado;
+  String? sexoSeleccionado;
+  String? vetSeleccionado;
+
+  List<Map<String, dynamic>> veterinarios = [];
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    cargarDatos();
+  }
+
+  Future<void> cargarDatos() async {
+    await Future.wait([
+      cargarVeterinarios(),
+      cargarMascota(),
+    ]);
+  }
+
+  Future<void> cargarVeterinarios() async {
+    try {
+      final url = Uri.parse("${Config.backendUrl}/usuarios?rol=veterinario");
+      final resp = await http.get(url);
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        setState(() {
+          veterinarios = List<Map<String, dynamic>>.from(data['data']);
+        });
+      }
+    } catch (e) {
+      print("Error cargando veterinarios: $e");
+    }
+  }
+
+  Future<void> cargarMascota() async {
+    try {
+      final url = Uri.parse("${Config.backendUrl}/mascotas/${widget.mascotaId}");
+      final resp = await http.get(url);
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        final mascota = data['data'];
+
+        String fechaFormateada = '';
+        if (mascota['fechaNacimiento'] != null) {
+          try {
+            DateTime fechaObj = DateTime.parse(mascota['fechaNacimiento']);
+            fechaFormateada = "${fechaObj.day.toString().padLeft(2, '0')}/${fechaObj.month.toString().padLeft(2, '0')}/${fechaObj.year}";
+          } catch (e) {
+            fechaFormateada = mascota['fechaNacimiento'].toString();
+          }
+        }
+
+        String? vetId;
+        if (mascota['vet_id'] != null) {
+          if (mascota['vet_id'] is String) {
+            vetId = mascota['vet_id'];
+          } else if (mascota['vet_id'] is Map) {
+            vetId = mascota['vet_id']['id'];
+          }
+        }
+
+        setState(() {
+          nombre.text = mascota['nombre'] ?? '';
+          raza.text = mascota['raza'] ?? '';
+          peso.text = mascota['peso']?.toString() ?? '';
+          fecha.text = fechaFormateada;
+          tipoSeleccionado = mascota['tipo'];
+          sexoSeleccionado = mascota['sexo'];
+          vetSeleccionado = vetId;
+          cargando = false;
+        });
+      } else {
+        setState(() => cargando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al cargar mascota")),
+        );
+      }
+    } catch (e) {
+      setState(() => cargando = false);
+      print("Error cargando mascota: $e");
+    }
+  }
+
+  Future<void> actualizarMascota() async {
+    if (nombre.text.isEmpty ||
+        raza.text.isEmpty ||
+        peso.text.isEmpty ||
+        fecha.text.isEmpty ||
+        tipoSeleccionado == null ||
+        sexoSeleccionado == null ||
+        vetSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Completa todos los campos")),
+      );
+      return;
+    }
+
+    final url = Uri.parse("${Config.backendUrl}/mascotas/${widget.mascotaId}");
+
+    List<String> partesFecha = fecha.text.split('/');
+    String fechaISO = "${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}";
+
+    final body = {
+      "nombre": nombre.text,
+      "raza": raza.text,
+      "tipo": tipoSeleccionado,
+      "sexo": sexoSeleccionado,
+      "peso": peso.text,
+      "fechaNacimiento": fechaISO,
+      "vet_id": vetSeleccionado,
+    };
+
+    try {
+      final resp = await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (resp.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Mascota actualizada correctamente"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        print("Error ${resp.statusCode}: ${resp.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al actualizar mascota")),
+        );
+      }
+    } catch (e) {
+      print("Excepción: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error de conexión")),
+      );
+    }
+  }
 
   InputDecoration deco(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(
-          color: Colors.black
-      ),
+      labelStyle: TextStyle(color: Colors.black),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -42,7 +185,9 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
           foregroundColor: Colores.azulOscuro,
         ),
 
-        body: ListView(
+        body: cargando
+            ? Center(child: CircularProgressIndicator(color: Colors.blue,))
+            : ListView(
           padding: EdgeInsets.all(20),
           children: [
             Container(
@@ -123,9 +268,7 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 12,),
-
                     TextField(
                       controller: nombre,
                       decoration: deco("Nombre de la mascota", Icons.pets),
@@ -136,8 +279,8 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
                     DropdownButtonFormField<String>(
                       value: tipoSeleccionado,
                       items: [
-                        DropdownMenuItem(value: "Gato", child: Text("Gato")),
                         DropdownMenuItem(value: "Perro", child: Text("Perro")),
+                        DropdownMenuItem(value: "Gato", child: Text("Gato")),
                       ],
                       onChanged: (v) => setState(() => tipoSeleccionado = v),
                       decoration: deco("Tipo", Icons.category),
@@ -152,10 +295,39 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
 
                     SizedBox(height: 20),
 
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: peso,
+                            decoration: deco("Peso", Icons.monitor_weight),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: sexoSeleccionado,
+                            items: [
+                              DropdownMenuItem(value: "Macho", child: Text("Macho")),
+                              DropdownMenuItem(value: "Hembra", child: Text("Hembra")),
+                            ],
+                            onChanged: (v) =>
+                                setState(() => sexoSeleccionado = v),
+                            decoration: deco("Sexo", Icons.male),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20),
+
                     TextField(
                       controller: fecha,
                       readOnly: true,
-                      decoration: deco("Fecha de nacimiento", Icons.cake).copyWith(
+                      decoration:
+                      deco("Fecha de nacimiento", Icons.cake).copyWith(
                         suffixIcon: Icon(Icons.calendar_today, color: Colors.black),
                       ),
                       onTap: () async {
@@ -164,15 +336,12 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
                           initialDate: DateTime(2020),
                           firstDate: DateTime(2000),
                           lastDate: DateTime.now(),
-
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
                                 colorScheme: ColorScheme.light(
                                     primary: Colores.azulPrimario,
-                                    onPrimary: Colors.white
-                                ),
-
+                                    onPrimary: Colors.white),
                                 textButtonTheme: TextButtonThemeData(
                                   style: TextButton.styleFrom(
                                     foregroundColor: Colores.azulPrimario,
@@ -185,7 +354,8 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
                         );
 
                         if (f != null) {
-                          fecha.text = "${f.day.toString().padLeft(2, '0')}/${f.month.toString().padLeft(2, '0')}/${f.year}";
+                          fecha.text =
+                          "${f.day.toString().padLeft(2, '0')}/${f.month.toString().padLeft(2, '0')}/${f.year}";
                         }
                       },
                     ),
@@ -214,12 +384,14 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
 
                     SizedBox(height: 12,),
 
-                    DropdownButtonFormField<int>(
+                    DropdownButtonFormField<String>(
                       value: vetSeleccionado,
-                      items: [
-                        DropdownMenuItem(value: 1, child: Text("Clínica PetCare")),
-                        DropdownMenuItem(value: 2, child: Text("Veterinaria Central")),
-                      ],
+                      items: veterinarios.map((vet) {
+                        return DropdownMenuItem<String>(
+                          value: vet['uid'],
+                          child: Text("${vet['nombre']} ${vet['apellidos']}"),
+                        );
+                      }).toList(),
                       onChanged: (v) => setState(() => vetSeleccionado = v),
                       decoration: deco("Veterinario", Icons.local_hospital),
                     ),
@@ -243,30 +415,27 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
                               )
                           ),
                         ),
-
                         SizedBox(width: 16),
-
                         Expanded(
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: actualizarMascota,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colores.azulPrimario,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.autorenew, color: Colors.white,),
+                                  Icon(Icons.autorenew, color: Colors.white,
+                                  ),
                                   SizedBox(width: 6,),
                                   Text("Actualizar",
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
-                                          letterSpacing: 1
-                                      )
+                                          letterSpacing: 1)
                                   ),
                                 ],
-                              )
-                          ),
+                              )),
                         ),
                       ],
                     ),
