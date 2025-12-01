@@ -58,7 +58,7 @@ const getMascotas = async (req, res) => {
           nombre_dueno: `${dueno.nombre} ${dueno.apellidos}`,
           fechaNacimiento: d.fechaNacimiento.toDate(),
           vet_id: d.vet_id ?? null,
-          vet_nombre: vet?.nombre ?? null,
+          vet_nombre: vet ? `${vet.nombre} ${vet.apellidos}` : null,
         };
       })
     );
@@ -105,7 +105,7 @@ const getMascota = async (req, res) => {
       telefono_dueno: dueno.telefono,
       correo_dueno: dueno.email,
       fechaNacimiento: d.fechaNacimiento.toDate(),
-      vet_id: d.vet_id ?? null,
+      vet_id: d.vet_id?.id ?? null,
     };
 
     return res.status(200).json({ status: 'success', data: mascota });
@@ -127,7 +127,7 @@ const createMascota = async (req, res) => {
       raza: data.raza,
       tipo: data.tipo,
       fechaNacimiento: new Date(data.fechaNacimiento),
-      vet_id: data.vet_id ?? null,
+      vet_id: data.vet_id ? db.collection('usuarios').doc(data.vet_id) : null,
       peso: data.peso,
       sexo: data.sexo,
 
@@ -149,8 +149,80 @@ const createMascota = async (req, res) => {
   }
 };
 
+const deleteMascota = async (req, res) => {
+  const { mascotaId } = req.params;
+
+  try {
+    const ref = mascotaCol.doc(mascotaId);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      return res.status(404).json({
+        status: 'fail',
+        message: `Mascota con id ${mascotaId} no encontrada`,
+      });
+    }
+
+    await ref.delete();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Mascota eliminada correctamente',
+    });
+  } catch (error) {
+    console.error('Error deleteMascota:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+};
+
+const updateMascota = async (req, res) => {
+  const { mascotaId } = req.params;
+  const data = req.body;
+
+  try {
+    const ref = mascotaCol.doc(mascotaId);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      return res.status(404).json({
+        status: 'fail',
+        message: `Mascota con id ${mascotaId} no encontrada`,
+      });
+    }
+
+    const mascotaActualizada = {
+      nombre: data.nombre,
+      raza: data.raza,
+      tipo: data.tipo,
+      sexo: data.sexo,
+      peso: data.peso,
+      fechaNacimiento: new Date(data.fechaNacimiento),
+      vet_id: data.vet_id ? db.collection('usuarios').doc(data.vet_id) : null,
+    };
+
+    await ref.update(mascotaActualizada);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Mascota actualizada correctamente',
+      data: { id: mascotaId, ...mascotaActualizada },
+    });
+  } catch (error) {
+    console.error('Error updateMascota:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+};
+
 export default {
   getMascotas,
   getMascota,
   createMascota,
+  deleteMascota,
+  updateMascota
 };

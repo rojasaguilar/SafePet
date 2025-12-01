@@ -14,7 +14,11 @@ router
   .get(verifyUserToken, mascotaController.getMascotas)
   .post(mascotaController.createMascota);
 
-router.route('/:mascotaId').get(mascotaController.getMascota);
+router
+.route('/:mascotaId')
+.get(mascotaController.getMascota)
+.delete(mascotaController.deleteMascota)
+.put(mascotaController.updateMascota);
 // router.use('/:mascotaId/citas', citasRouter);
 
 export default router;
