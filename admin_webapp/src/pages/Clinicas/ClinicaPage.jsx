@@ -10,7 +10,6 @@ import {
   User,
   Stethoscope,
   Edit,
-  Trash2,
   CheckCircle,
   AlertTriangle,
   Navigation,
