@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safe_pet_client/theme.dart';
-
+import 'package:safe_pet_client/notification_service.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safe_pet_client/config.dart';
@@ -109,6 +109,21 @@ class _crearmascotaState extends State<crearmascota> {
       );
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final bodyResponse = jsonDecode(resp.body);
+        final String mascotaId = bodyResponse['data']['id'];
+
+        final DateTime fechaNacimiento = DateTime.parse(fechaISO);
+
+        if (tipoSeleccionado == "Perro" || tipoSeleccionado == "Gato") {
+          final int notificationId = NotificationService.generateUniqueId(mascotaId);
+
+          NotificationService.scheduleBirthdayNotification(
+            id: notificationId,
+            petName: nombre.text,
+            birthday: fechaNacimiento,
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Mascota registrada correctamente")),
         );

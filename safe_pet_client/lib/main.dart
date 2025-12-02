@@ -5,10 +5,12 @@ import 'package:safe_pet_client/pages/clinicas/Clinicas.dart';
 import 'package:safe_pet_client/pages/mascotas/Mascota.dart';
 import 'package:safe_pet_client/pages/welcome.dart';
 
+import 'notification_service.dart';
+
 void main() async {
 WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  await NotificationService.initNotifications();
   runApp(SafePetApp());
 }
 

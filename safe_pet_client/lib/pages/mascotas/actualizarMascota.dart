@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safe_pet_client/config.dart';
 
+import '../../notification_service.dart';
+
 class ActualizarMascota extends StatefulWidget {
   final String mascotaId;
   const ActualizarMascota({super.key, required this.mascotaId});
@@ -141,6 +143,19 @@ class _ActualizarMascotaState extends State<ActualizarMascota> {
       );
 
       if (resp.statusCode == 200) {
+        final DateTime fechaNacimiento = DateTime.parse(fechaISO);
+
+        final int notificationId = NotificationService.generateUniqueId(widget.mascotaId);
+        NotificationService.cancelNotification(notificationId);
+
+        if (tipoSeleccionado == "Perro" || tipoSeleccionado == "Gato") {
+          NotificationService.scheduleBirthdayNotification(
+            id: notificationId,
+            petName: nombre.text,
+            birthday: fechaNacimiento,
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Mascota actualizada correctamente"),

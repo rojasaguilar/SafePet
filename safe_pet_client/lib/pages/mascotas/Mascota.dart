@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safe_pet_client/config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:safe_pet_client/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:safe_pet_client/pages/mascotas/actualizarMascota.dart';
 import 'package:safe_pet_client/pages/mascotas/crearMascota.dart';
@@ -243,6 +243,9 @@ class _MascotasScreenState extends State<PantallaMascotas> {
       final response = await http.delete(url);
 
       if (response.statusCode == 200 || response.statusCode == 204) {
+        final int notificationId = NotificationService.generateUniqueId(mascotaId);
+        NotificationService.cancelNotification(notificationId);
+
         setState(() {
           mascotas.removeAt(index);
         });
