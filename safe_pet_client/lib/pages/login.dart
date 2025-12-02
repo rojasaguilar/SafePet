@@ -30,7 +30,7 @@ class _LoginState extends State<Login> {
       final token = await userCredential.user!.getIdToken();
       print(token);
 
-      Navigator.push(context, MaterialPageRoute(builder: (x) => Home()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (x) => Home()));
     } catch (e) {
       print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(

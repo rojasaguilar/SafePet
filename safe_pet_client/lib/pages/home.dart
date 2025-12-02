@@ -99,153 +99,164 @@ class _HomeState extends State<Home> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_titulos[_indice], style: TextStyle(
-          fontWeight: FontWeight.bold
-        ),),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        actions: [
-          PopupMenuButton(
-            icon: Icon(Icons.menu),
-            itemBuilder: (context) => [
-              PopupMenuItem(child: TextButton(
-                  onPressed: (){
-                    showDialog(
-                        context: context,
-                        builder: (x) {
-                          return AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            titlePadding: EdgeInsets.only(top: 20, left: 20, right: 20),
-                            contentPadding: EdgeInsets.zero,
-                            actionsPadding: EdgeInsets.zero,
+    return WillPopScope(
+      onWillPop: () async {
+        if (_indice != 0) {
+          setState(() {
+            _indice = 0;
+          });
+          return false;
+        }
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_titulos[_indice], style: TextStyle(
+            fontWeight: FontWeight.bold
+          ),),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          actions: [
+            PopupMenuButton(
+              icon: Icon(Icons.menu),
+              itemBuilder: (context) => [
+                PopupMenuItem(child: TextButton(
+                    onPressed: (){
+                      showDialog(
+                          context: context,
+                          builder: (x) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              titlePadding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                              contentPadding: EdgeInsets.zero,
+                              actionsPadding: EdgeInsets.zero,
 
-                            title: Column(
-                              children: [
-                                Text("¿Salir de tu\ncuenta?",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 10,),
-                              ],
-                            ),
-
-                            actions: [
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
+                              title: Column(
                                 children: [
-                                  Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
-
-                                  InkWell(
-                                    onTap: () async {
-                                      try {
-                                        await FirebaseAuth.instance.signOut();
-                                        Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(builder: (x) => Welcome())
-                                        );
-                                      } catch (e) {
-                                        print("Error al cerrar sesión: $e");
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text("Error al cerrar sesión")),
-                                        );
-                                      }
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: EdgeInsets.symmetric(vertical: 14),
-                                      alignment: Alignment.center,
-                                      child: Text("Salir",
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                  Text("¿Salir de tu\ncuenta?",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-
-                                  Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
-
-                                  InkWell(
-                                    onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: EdgeInsets.symmetric(vertical: 14),
-                                      alignment: Alignment.center,
-                                      child: Text("Cancelar",
-                                        style: TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 17,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  SizedBox(height: 10,),
                                 ],
-                              )
-                            ],
-                          );
-                        }
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.black,),
-                      SizedBox(width: 8,),
-                      Text("Cerrar sesión",
-                        style: TextStyle(
-                          color: Colors.black
-                        ),
-                      )
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero
-                  ),
-              )),
-            ]
-          ),
-        ],
-      ),
+                              ),
 
-      body: contenido(),
+                              actions: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _indice,
-        onTap: (index) {
-          setState(() => _indice = index);
-          if (index == 0) {
-            ObtenerMascotas();
-          }
-        },
-        items:  [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Inicio",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets),
-            label: "Mascotas",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: "Citas",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
-            label: "Clínicas",
-          ),
-        ],
+                                    InkWell(
+                                      onTap: () async {
+                                        try {
+                                          await FirebaseAuth.instance.signOut();
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(builder: (x) => Welcome())
+                                          );
+                                        } catch (e) {
+                                          print("Error al cerrar sesión: $e");
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text("Error al cerrar sesión")),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(vertical: 14),
+                                        alignment: Alignment.center,
+                                        child: Text("Salir",
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
 
-        selectedItemColor: Colores.azulPrimario,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
+                                    Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
+
+                                    InkWell(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(vertical: 14),
+                                        alignment: Alignment.center,
+                                        child: Text("Cancelar",
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            );
+                          }
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.black,),
+                        SizedBox(width: 8,),
+                        Text("Cerrar sesión",
+                          style: TextStyle(
+                            color: Colors.black
+                          ),
+                        )
+                      ],
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero
+                    ),
+                )),
+              ]
+            ),
+          ],
+        ),
+
+        body: contenido(),
+
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _indice,
+          onTap: (index) {
+            setState(() => _indice = index);
+            if (index == 0) {
+              ObtenerMascotas();
+            }
+          },
+          items:  [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Inicio",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.pets),
+              label: "Mascotas",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: "Citas",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_on),
+              label: "Clínicas",
+            ),
+          ],
+
+          selectedItemColor: Colores.azulPrimario,
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+        ),
       ),
     );
   }
