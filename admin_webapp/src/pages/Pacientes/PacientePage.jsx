@@ -46,6 +46,8 @@ function PacientePage() {
     console.log('Editando mascota:', id);
   };
 
+  console.log(mascota);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -84,20 +86,20 @@ function PacientePage() {
             {/* Banner Fondo */}
             {/* <div className={`h-32 w-full ${mascota.tipo === 'gato' ? 'bg-purple-100' : 'bg-orange-100'}`}></div> */}
 
-            <div className="px-6 pb-6 relative">
+            <div className="px-6 pb-6 flex flex-col">
               {/* Avatar Mascota */}
-              <div className="w-32 h-32 rounded-full border-4 border-white shadow-md bg-slate-200 absolute -top-16 left-1/2 transform -translate-x-1/2 overflow-hidden">
+              <div className="w-32 h-32 rounded-full border-4 border-white shadow-md bg-slate-200 self-center">
                 <img
                   src={mascota.imagen || `/src/assets/${mascota.tipo}.jpg`}
                   alt={mascota.nombre}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/150?text=Pet';
                   }}
                 />
               </div>
 
-              <div className="mt-20 text-center space-y-1">
+              <div className="text-center space-y-1">
                 <h2 className="text-3xl font-bold text-slate-800">{capitalize(mascota.nombre)}</h2>
                 <p className="text-slate-500 font-medium">{mascota.raza}</p>
                 <div className="flex justify-center gap-2 mt-3">
@@ -111,8 +113,8 @@ function PacientePage() {
               <div className="grid grid-cols-2 gap-3 mt-8">
                 <Sexo sexo={mascota.sexo} />
                 <Peso peso={mascota.peso} />
-                <Edad fechaNacimiento={mascota.fechaNacimiento}/>
-                <Tipo tipo={mascota.tipo}/>
+                <Edad fechaNacimiento={mascota.fechaNacimiento} />
+                <Tipo tipo={mascota.tipo} />
               </div>
             </div>
           </div>

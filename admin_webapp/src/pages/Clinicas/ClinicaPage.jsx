@@ -14,6 +14,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Navigation,
+  BadgeCheck,
+  Ban,
 } from 'lucide-react';
 
 // --- COMPONENTE DE MAPA (SOLO LECTURA) ---
@@ -102,11 +104,28 @@ function ClinicaPage() {
 
   console.log(clinica);
 
-  const handleDelete = () => {
-    if (confirm('¿Estás seguro de eliminar esta sucursal del sistema?')) {
+  const handleDelete = async () => {
+    if (confirm('¿Estás seguro de desactivar esta sucursal del sistema?')) {
       // Lógica de borrado
-      alert('Sucursal eliminada');
-      navigate('/clinicas');
+      const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL_BASE}/clinicas/${id}`);
+
+      if (response.status === 200) {
+        alert('Sucursal desactivada');
+        navigate('/clinicas');
+      }
+    }
+  };
+  const handleActivate = async () => {
+    if (confirm('¿Volver a activar esta sucursal del sistema?')) {
+      // Lógica de borrado
+      const response = await axios.patch(`${import.meta.env.VITE_BACKEND_URL_BASE}/clinicas/${id}`, {
+        estado: 'activo',
+      });
+
+      if (response.status === 200) {
+        alert('Sucursal activa');
+        navigate('/clinicas');
+      }
     }
   };
 
@@ -149,18 +168,30 @@ function ClinicaPage() {
               <Building2 className="text-blue-600" />
               {clinica.nombre}
             </h1>
-            <p className="text-xs text-slate-400">ID Sucursal: #{clinica.id}</p>
+            <p className="text-xs text-slate-400">ID Sucursal: #{clinica.clinica_id}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button
-            onClick={handleDelete}
-            className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"
-            title="Eliminar Sucursal"
-          >
-            <Trash2 size={20} />
-          </button>
+          {clinica.estado === 'inactivo' ? (
+            <button
+              onClick={handleActivate}
+              className="p-2.5 text-blue-500 hover:bg-blue-50 rounded-xl transition-colors border border-transparent hover:border-blue-100 flex flex-col items-center"
+              title="Eliminar Sucursal"
+            >
+              <BadgeCheck size={20} />
+              Activar
+            </button>
+          ) : (
+            <button
+              onClick={handleDelete}
+              className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100 flex flex-col items-center"
+              title="Eliminar Sucursal"
+            >
+              <Ban size={20} />
+              Desactivar
+            </button>
+          )}
           <button
             onClick={() => navigate(`/clinicas/editar/${id}`)}
             className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-slate-900/20 transition-all active:scale-95"

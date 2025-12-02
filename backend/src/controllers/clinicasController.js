@@ -60,7 +60,7 @@ const getClincia = async (req, res) => {
       .collection('usuarios')
       .doc(clinicaData.encargado.id);
     const encargadoSnap = await encargadoRef.get();
-    const encargadoData = encargadoSnap.data()
+    const encargadoData = encargadoSnap.data();
 
     return res.status(200).json({
       status: 'success',
@@ -68,7 +68,7 @@ const getClincia = async (req, res) => {
       data: {
         clinica_id: clinicaSnapshot.id,
         ...clinicaData,
-        encargado_nombre: `${encargadoData.nombre} ${encargadoData.apellidos}`
+        encargado_nombre: `${encargadoData.nombre} ${encargadoData.apellidos}`,
       },
     });
   } catch (error) {
@@ -123,8 +123,57 @@ const addClinica = async (req, res) => {
   }
 };
 
+const deleteClinica = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const clinicaRef = clinicasCol.doc(id);
+
+    const updatedClinica = await clinicaRef.update({ estado: 'inactivo' });
+
+    return res.status(200).json({
+      status: 'succes',
+      message: 'clinca desactivada',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: 'fail',
+      message: 'clinca NO desactivada',
+      error,
+    });
+  }
+};
+
+const updateClinica = async (req, res) => {
+  const { id } = req.params;
+  const { body } = req;
+
+  const updatedClinica = { ...body };
+
+  try {
+    const clinicaRef = clinicasCol.doc(id);
+
+    await clinicaRef.update(updatedClinica);
+
+    return res.status(200).json({
+      status: 'succes',
+      message: 'clinca actualizada',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: 'fail',
+      message: 'clinca NO desactivada',
+      error,
+    });
+  }
+};
+
 export default {
   getClinicas,
   getClincia,
   addClinica,
+  deleteClinica,
+  updateClinica
 };

@@ -81,6 +81,8 @@ function CitaPage() {
     }
   };
 
+  console.log(cita);
+
   if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -110,8 +112,9 @@ function CitaPage() {
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
+            disabled={cita.asistencia !== 'pendiente'}
             onClick={handleEdit}
-            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-blue-100 bg-white shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-blue-100 bg-white shadow-sm disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
             title="Editar Cita"
           >
             <PencilIcon size={18} />

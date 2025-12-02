@@ -81,6 +81,8 @@ function ActualizarCita({ handleEditing }) {
     fetchCita();
   }, []);
 
+  console.log(cita)
+
   // Manejadores
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -96,7 +98,7 @@ function ActualizarCita({ handleEditing }) {
         ...cita,
         fechaProgramada: fechaCompleta.toISOString(),
       });
-      if (updated.ok) {
+      if (updated.status === 200) {
         alert('si se actualizó');
       }
       navigate(-1);
@@ -150,7 +152,7 @@ function ActualizarCita({ handleEditing }) {
             <ArrowLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-800 flex items-center gap-3">Cita #{cita.id}</h1>
+            <h1 className="text-xl font-bold text-slate-800 flex items-center gap-3">Cita #{cita.cita_id}</h1>
             <p className="text-xs text-slate-400">Creada el 20 Oct 2023</p>
           </div>
         </div>
@@ -162,14 +164,6 @@ function ActualizarCita({ handleEditing }) {
             title="Cancelar"
           >
             Cancelar
-          </button>
-
-          <button
-            onClick={handleDelete}
-            className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"
-            title="Eliminar Cita"
-          >
-            <Trash2 size={20} />
           </button>
 
           <button

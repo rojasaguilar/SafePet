@@ -8,6 +8,10 @@ router
   .get(clinicasController.getClinicas)
   .post(clinicasController.addClinica);
 
-router.route('/:id').get(clinicasController.getClincia);
+router
+  .route('/:id')
+  .get(clinicasController.getClincia)
+  .delete(clinicasController.deleteClinica)
+  .patch(clinicasController.updateClinica);
 
 export default router;

@@ -27,16 +27,20 @@ function AgregarCita() {
   // Datos para los selectores (Mocks)
   const [pacientes, setPacientes] = useState([]);
   const [veterinarios, setVeterinarios] = useState([]);
+  const [clinicas, setClinicas] = useState([]);
 
   // Estado del Formulario
   const [formData, setFormData] = useState({
     mascota_id: '',
-    veterinario_id: '',
-    fecha: '',
+    vet_id: '',
+    fechaProgramada: '',
+    fecha: "",
     hora: '',
     motivo: '',
     notas: '',
   });
+
+  console.log(formData);
 
   // Efecto para cargar datos iniciales (Pacientes y Veterinarios)
   useEffect(() => {
@@ -45,6 +49,7 @@ function AgregarCita() {
       try {
         fetchVets();
         fetchMascotas();
+        fetchClinicas();
       } catch (error) {
         console.error('Error cargando datos:', error);
       } finally {
@@ -64,6 +69,16 @@ function AgregarCita() {
     setVeterinarios(data.data);
   };
 
+  const fetchClinicas = async () => {
+    const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/clinicas`, {
+      headers: {
+        app: 'admin-webapp',
+        Authorization: `Bearer ${loggedUser.idToken}`,
+      },
+    });
+    setClinicas(data.data);
+  };
+
   const fetchMascotas = async () => {
     const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/mascotas`, {
       headers: {
@@ -73,6 +88,8 @@ function AgregarCita() {
     });
     setPacientes(data.data);
   };
+
+  console.log(pacientes);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,15 +106,19 @@ function AgregarCita() {
       setIsSubmitting(false);
       return;
     }
+    const fechaCompleta = new Date(`${formData.fecha}T${formData.hora}`);
+    console.log(fechaCompleta);
+
+    formData.fechaProgramada = fechaCompleta;
 
     try {
       // --- LÓGICA DE GUARDADO ---
-      // await axios.post(`${import.meta.env.VITE_BACKEND_URL_BASE}/citas`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL_BASE}/citas`, formData);
 
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simular delay
-      console.log('Cita creada:', formData);
-      alert('¡Cita agendada exitosamente!');
-      navigate(-1); // Regresar
+      if (response.status === 201) {
+        alert(response.data.mensaje);
+        navigate('/citas');
+      }
     } catch (error) {
       console.error('Error al guardar:', error);
       alert('Ocurrió un error al agendar la cita.');
@@ -107,8 +128,8 @@ function AgregarCita() {
   };
 
   // Helpers para visualización en el resumen
-  const selectedMascota = pacientes.find((p) => p.mascota_id === formData.mascota_id);
-  const selectedVet = veterinarios.find((v) => v.uid === formData.veterinario_id);
+  const selectedMascota = pacientes.find((p) => p.id === formData.mascota_id);
+  const selectedVet = veterinarios.find((v) => v.uid === formData.vet_id);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-12">
@@ -157,7 +178,7 @@ function AgregarCita() {
                     >
                       <option value="">Seleccionar Mascota...</option>
                       {pacientes.map((p) => (
-                        <option key={p.id} value={p.mascota_id}>
+                        <option key={p.id} value={p.id}>
                           {p.nombre} ({p.raza}) - Dueño: {p.nombre_dueno}
                         </option>
                       ))}
@@ -171,15 +192,39 @@ function AgregarCita() {
                   <div className="relative">
                     <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <select
-                      name="veterinario_id"
-                      value={formData.veterinario_id}
+                      name="vet_id"
+                      value={formData.vet_id}
                       onChange={handleChange}
                       className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-slate-700"
                     >
-                      <option value="">Cualquier disponible</option>
+                      <option value="">Selecciona veterinario</option>
                       {veterinarios.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.nombre} - {v.especialidad}
+                        <option key={v.id} value={v.uid}>
+                          {v.nombre} {v.apellidos} - {v.especialidad}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Selector Clinicas */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-slate-700">
+                    Clinica <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <PawPrint className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <select
+                      name="clinica_id"
+                      value={formData.clinica_id}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-slate-700"
+                      required
+                    >
+                      <option value="">Seleccionar Clinica...</option>
+                      {clinicas.map((c) => (
+                        <option key={c.clinica_id} value={c.clinica_id}>
+                          {c.nombre}
                         </option>
                       ))}
                     </select>
@@ -329,7 +374,9 @@ function AgregarCita() {
               <div className="flex gap-4 items-start">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    formData.fecha && formData.hora ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'
+                    formData.fecha && formData.hora
+                      ? 'bg-orange-100 text-orange-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                 >
                   <Clock size={18} />

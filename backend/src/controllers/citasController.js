@@ -3,14 +3,9 @@ import { db } from '../config/firebase.js';
 const citasCol = db.collection('citas');
 
 const getCitas = async (req, res) => {
-  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
-  // const {loggedUser} = req
-
-  // console.log(loggedUser)
-  //MIDDLEWARE PARA VER TOKEN, PERO FALTA ADECUARLO PORQUE SE TINENE QUE MANDAR POR HEADER
+  // ... tu lógica de query existente ...
   let query = citasCol;
-  const { mascotaId, uid } = req.query;
-  console.log(mascotaId);
+  const { mascotaId, uid,sort } = req.query;
 
   if (mascotaId) {
     const mascotaRef = db.collection('mascotas').doc(mascotaId);
@@ -22,12 +17,23 @@ const getCitas = async (req, res) => {
     query = query.where('ui_dueno', '==', usuarioRef);
   }
 
-  // if (req.queryObject) {
-  //   query = query.where('mascota_id', '==', req.mascotaId);
-  // }
+  if(sort){
+    query = query.orderBy(sort, "asc")
+  }
 
   try {
     const snapshot = await query.get();
+
+    // --- CORRECCIÓN 1: EARLY RETURN ---
+    // Si no hay documentos, retornamos respuesta vacía INMEDIATAMENTE.
+    // Esto evita que db.getAll() falle por recibir arrays vacíos.
+    if (snapshot.empty) {
+      return res.status(200).json({
+        status: 'success',
+        results: 0,
+        data: [],
+      });
+    }
 
     const citasDocs = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -40,55 +46,88 @@ const getCitas = async (req, res) => {
     const duenoIDs = new Set();
 
     citasDocs.forEach((c) => {
-      vetIDs.add(c.vet_id.id);
-      mascotaIDs.add(c.mascota_id.id);
-      duenoIDs.add(c.ui_dueno.id);
+      // Validación extra por si vet_id viene null en BD
+      if (c.vet_id) vetIDs.add(c.vet_id.id);
+      if (c.mascota_id) mascotaIDs.add(c.mascota_id.id);
+      if (c.ui_dueno) duenoIDs.add(c.ui_dueno.id);
     });
 
-    // 2. Hacer batch fetch (1 consulta por colección)
-    const vetsSnap = await db.getAll(
-      ...[...vetIDs].map((id) => db.collection('usuarios').doc(id))
-    );
-    const mascotasSnap = await db.getAll(
-      ...[...mascotaIDs].map((id) => db.collection('mascotas').doc(id))
-    );
-    const duenosSnap = await db.getAll(
-      ...[...duenoIDs].map((id) => db.collection('usuarios').doc(id))
-    );
-
-    // 3. Crear diccionarios
+    // --- CORRECCIÓN 2: Declarar mapas FUERA de los IFs ---
+    // Para evitar errores de "variable not defined"
     const vetsMap = {};
-    vetsSnap.forEach((doc) => (vetsMap[doc.id] = doc.data()));
-
     const mascotasMap = {};
-    mascotasSnap.forEach((doc) => (mascotasMap[doc.id] = doc.data()));
-
     const duenosMap = {};
-    duenosSnap.forEach((doc) => (duenosMap[doc.id] = doc.data()));
 
-    console.log(duenosMap);
+    // 2. Hacer batch fetch SOLO si hay IDs
+    const promises = [];
+
+    if (vetIDs.size > 0) {
+      promises.push(
+        db
+          .getAll(...[...vetIDs].map((id) => db.collection('usuarios').doc(id)))
+          .then((snaps) =>
+            snaps.forEach((doc) => (vetsMap[doc.id] = doc.data()))
+          )
+      );
+    }
+
+    if (mascotaIDs.size > 0) {
+      promises.push(
+        db
+          .getAll(
+            ...[...mascotaIDs].map((id) => db.collection('mascotas').doc(id))
+          )
+          .then((snaps) =>
+            snaps.forEach((doc) => (mascotasMap[doc.id] = doc.data()))
+          )
+      );
+    }
+
+    if (duenoIDs.size > 0) {
+      promises.push(
+        db
+          .getAll(
+            ...[...duenoIDs].map((id) => db.collection('usuarios').doc(id))
+          )
+          .then((snaps) =>
+            snaps.forEach((doc) => (duenosMap[doc.id] = doc.data()))
+          )
+      );
+    }
+
+    // Esperar a que todas las consultas auxiliares terminen
+    await Promise.all(promises);
 
     // 4. Construir respuesta final
     const citas = citasDocs.map((d) => {
-      const fecha = new Date(d.fechaProgramada.toDate());
+      // Manejo seguro de fechas
+      const fecha = d.fechaProgramada
+        ? new Date(d.fechaProgramada.toDate())
+        : new Date();
       const dia = fecha.toLocaleString('es-ES', { day: '2-digit' });
       const mes = fecha.toLocaleString('es-ES', { month: 'long' });
       const hora = fecha.toLocaleTimeString('en-US', { timeStyle: 'short' });
 
+      // --- CORRECCIÓN 3: OPTIONAL CHAINING (?.) ---
+      // Usamos ?. para evitar crash si falta algún dato relacionado
+      const vetData = d.vet_id ? vetsMap[d.vet_id.id] : null;
+      const mascotaData = d.mascota_id ? mascotasMap[d.mascota_id.id] : null;
+      const duenoData = d.ui_dueno ? duenosMap[d.ui_dueno.id] : null;
+
       return {
         cita_id: d.id,
         ...d,
-        vet_nombre: `${vetsMap[d.vet_id.id].nombre} ${
-          vetsMap[d.vet_id.id].apellidos
-        }`,
+        vet_nombre: vetData
+          ? `${vetData.nombre} ${vetData.apellidos}`
+          : 'No asignado',
         fechaProgramada: `${dia} de ${mes} del ${fecha.getFullYear()}`,
         hora,
-        fechaCreacion: d.fechaCreacion.toDate(),
-        mascota_nombre: mascotasMap[d.mascota_id.id].nombre,
-        mascota_tipo: mascotasMap[d.mascota_id.id].tipo,
-        dueno_nombre: `${duenosMap[d.ui_dueno.id].nombre} ${
-          duenosMap[d.ui_dueno.id].apellidos
-        }`,
+        fechaCreacion: d.fechaCreacion ? d.fechaCreacion.toDate() : null,
+        mascota_nombre: mascotaData ? mascotaData.nombre : 'Desconocido',
+        mascota_tipo: mascotaData ? mascotaData.tipo : 'Desconocido',
+        dueno_nombre: duenoData
+          ? `${duenoData.nombre} ${duenoData.apellidos}`
+          : 'Desconocido',
       };
     });
 
@@ -98,7 +137,7 @@ const getCitas = async (req, res) => {
       data: citas,
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error en getCitas:', error);
     return res.status(500).json({ status: 'error', error: error.message });
   }
 };
@@ -183,23 +222,18 @@ const getCita = async (req, res) => {
 const addCita = async (req, res) => {
   const data = req.body;
 
+  console.log(data);
+
   //REFERENCIAS
-  const duenoRef = db.collection('usuarios').doc(data.ui_dueno);
+
   const mascotaRef = db.collection('mascotas').doc(data.mascota_id);
   const vetRef = db.collection('usuarios').doc(data.vet_id);
   const clinicaRef = db.collection('clinicas').doc(data.clinica_id);
 
-  const duenoSnapshot = await duenoRef.get();
   const mascotaSnapshot = await mascotaRef.get();
   const vetSnapshot = await vetRef.get();
   const clinicaSnapshot = await clinicaRef.get();
 
-  if (!duenoSnapshot.exists) {
-    return res.status(400).json({
-      status: 'FAIL',
-      message: `Dueño con id ${data.ui_dueno} no existe`,
-    });
-  }
   if (!mascotaSnapshot.exists) {
     return res.status(400).json({
       status: 'FAIL',
@@ -218,6 +252,17 @@ const addCita = async (req, res) => {
       message: `Clinica con id ${data.clinica_id} no existe`,
     });
   }
+  const mascota = await mascotaRef.get();
+  console.log(mascota.data());
+  const duenoRef = db.collection('usuarios').doc(mascota.data().ui_dueno.id);
+  const duenoSnapshot = await duenoRef.get();
+
+  if (!duenoSnapshot.exists) {
+    return res.status(400).json({
+      status: 'FAIL',
+      message: `Dueño con id ${data.ui_dueno} no existe`,
+    });
+  }
 
   const cita = {
     ui_dueno: duenoRef,
@@ -231,9 +276,8 @@ const addCita = async (req, res) => {
 
   try {
     const citaRef = await citasCol.add(cita);
-    const mascota = await mascotaRef.get();
 
-    return res.status(200).json({
+    return res.status(201).json({
       status: 'success',
       message: `Cita para ${mascota.data().nombre} con fecha ${
         cita.fechaProgramada
@@ -254,8 +298,8 @@ const updateCita = async (req, res) => {
 
   const updatedCita = {
     asistencia: body.asistencia,
-    motivo: body.motivo,
-    notas: body.notas,
+    motivo: body.motivo || "",
+    notas: body.notas || "",
   };
 
   if (body.fechaProgramada) {
@@ -310,5 +354,5 @@ export default {
   getCita,
   addCita,
   updateCita,
-  deleteCita
+  deleteCita,
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Upload, Camera, User, PawPrint, Calendar, Activity, Save, X } from 'lucide-react';
@@ -7,21 +7,38 @@ function AgregarPaciente() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [usuarios, setUsuarios] = useState([]);
+
+  const loggedUser = JSON.parse(sessionStorage.getItem('loggedUser'));
+
   // Estado del formulario
   const [formData, setFormData] = useState({
     nombre: '',
-    tipo: 'Perro', // Valor por defecto
+    tipo: 'Perro',
     raza: '',
     sexo: 'Macho',
     peso: '',
     fechaNacimiento: '',
     color: '',
-    ui_dueno: '', // ID del dueño
-    notas: '',
+    ui_dueno: '',
   });
 
-  
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      setIsLoading(true);
+      try {
+        // --- CÓDIGO REAL ---
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/usuarios?rol=usuario`);
+        setUsuarios(data.data);
+      } catch (error) {
+        console.error('Error cargando clínica:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchUsuarios();
+  }, []);
   // Manejador de cambios en inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +48,8 @@ function AgregarPaciente() {
     }));
   };
 
-  console.log(formData)
+  console.log(formData);
+  console.log(usuarios);
 
   // Envío del formulario
   const handleSubmit = async (e) => {
@@ -41,18 +59,15 @@ function AgregarPaciente() {
     try {
       console.log('Enviando datos...', formData);
 
-      // --- AQUÍ TU LÓGICA DE AXIOS ---
-      /*
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL_BASE}/api/v1/mascotas`, formData, {
-         headers: {
-            'Content-Type': 'application/json',
-            // Authorization: `Bearer ${token}`
-         }
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL_BASE}/mascotas`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'app': 'admin-webapp',
+          Authorization: `Bearer ${loggedUser.idToken}`,
+        },
       });
-      */
 
-     
-      navigate('/pacientes'); // Redirigir a la lista
+      if (response.status === 201) return navigate('/pacientes');
     } catch (error) {
       console.error('Error al crear paciente:', error);
       alert('Hubo un error al guardar. Por favor intenta de nuevo.');
@@ -77,39 +92,6 @@ function AgregarPaciente() {
       <div className="max-w-4xl mx-auto p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* --- COLUMNA IZQUIERDA: FOTO --- */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
-                <h3 className="font-bold text-slate-700 mb-4">Foto de Perfil</h3>
-
-                <div className="relative group cursor-pointer w-full aspect-square rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-300 hover:border-blue-400 transition-colors flex items-center justify-center">
-                  {previewImage ? (
-                    <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-slate-400 flex flex-col items-center gap-2">
-                      <Camera size={40} />
-                      <span className="text-sm font-medium">Subir Foto</span>
-                    </div>
-                  )}
-
-                  {/* Input Invisible */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-
-                  {/* Overlay Hover */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium">
-                    <Upload size={20} className="mr-2" />
-                    Cambiar
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400 mt-3">Formatos: JPG, PNG. Máx 5MB.</p>
-              </div>
-            </div>
-
             {/* --- COLUMNA DERECHA: DATOS --- */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sección: Datos Básicos */}
@@ -265,10 +247,12 @@ function AgregarPaciente() {
                       onChange={handleChange}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                     >
-                      <option value="">Seleccionar un usuario existente...</option>
-                      <option value="user1">Juan Pérez (juan@example.com)</option>
-                      <option value="user2">Maria Lopez (maria@example.com)</option>
-                      <option value="user3">Carlos Ruiz (carlos@example.com)</option>
+                      {usuarios.map((usuario) => (
+                        <option
+                          key={usuario.uid}
+                          value={usuario.uid}
+                        >{`${usuario.nombre} ${usuario.apellidos}`}</option>
+                      ))}
                     </select>
                     <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span>
