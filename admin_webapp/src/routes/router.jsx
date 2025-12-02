@@ -25,34 +25,123 @@ import UsuarioPage from '../pages/Usuarios/UsuarioPage.jsx';
 import ClinicasPage from './../pages/Clinicas/ClinicasPage.jsx';
 import AgregarCita from '../pages/Citas/AgregarCita.jsx';
 import AgregarUsuario from '../pages/Usuarios/AgregarUsuario.jsx';
+import PrivateRoute from './PrivateRoute.jsx';
 
 const router = createBrowserRouter([
   { path: '/landing', element: <LandingPage /> },
 
   {
     path: '/',
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
-      { path: 'dashboard', element: <Dashboard /> },
+      {
+        path: 'dashboard',
+        element: (
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        ),
+      },
 
       // PACIENTES
-      { path: 'pacientes', element: <PacientesPage /> },
-      { path: 'pacientes/nuevo', element: <AgregarPaciente /> },
-      { path: 'pacientes/:id', element: <PacientePage /> },
+      {
+        path: 'pacientes',
+        element: (
+          <PrivateRoute>
+            <PacientesPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'pacientes/nuevo',
+        element: (
+          <PrivateRoute>
+            <AgregarPaciente />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'pacientes/:id',
+        element: (
+          <PrivateRoute>
+            <PacientePage />
+          </PrivateRoute>
+        ),
+      },
 
       // CITAS
-      { path: 'citas', element: <CitasPage /> },
-      { path: 'citas/:id', element: <CitaPage /> },
-      { path: 'citas/nueva', element: <AgregarCita /> },
+      {
+        path: 'citas',
+        element: (
+          <PrivateRoute>
+            <CitasPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'citas/:id',
+        element: (
+          <PrivateRoute>
+            <CitaPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'citas/nueva',
+        element: (
+          <PrivateRoute>
+            <AgregarCita />
+          </PrivateRoute>
+        ),
+      },
 
       // USUARIOS
-      { path: 'veterinarios', element: <VeterinariosPage /> },
-      { path: 'usuarios', element: <UsuariosPage /> },
-      { path: 'usuarios/:id', element: <UsuarioPage /> },
-      { path: 'usuarios/nuevo', element: <AgregarUsuario /> },
+      {
+        path: 'veterinarios',
+        element: (
+          <PrivateRoute>
+            <VeterinariosPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'usuarios',
+        element: (
+          <PrivateRoute>
+            <UsuariosPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'usuarios/:id',
+        element: (
+          <PrivateRoute>
+            <UsuarioPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'usuarios/nuevo',
+        element: (
+          <PrivateRoute>
+            <AgregarUsuario />
+          </PrivateRoute>
+        ),
+      },
 
       // CLÍNICAS
-      { path: 'clinicas', element: <ClinicasPage /> },
+      {
+        path: 'clinicas',
+        element: (
+          <PrivateRoute>
+            <ClinicasPage />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 ]);

@@ -70,9 +70,9 @@ function AgregarUsuario() {
         },
       });
 
-      if (response.ok) {
+      if (response.status === 201) {
         alert('si');
-        // navigate('/usuarios'); // Redirigir a la lista
+        navigate('/usuarios'); // Redirigir a la lista
       }
     } catch (error) {
       console.error('Error al crear paciente:', error);
@@ -227,7 +227,7 @@ function AgregarUsuario() {
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-200">
             <button
               type="button"
-              onClick={() => navigate('/pacientes')}
+              onClick={() => navigate('/usuarios')}
               className="px-6 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
             >
               Cancelar

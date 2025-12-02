@@ -20,8 +20,7 @@ function AgregarPaciente() {
     notas: '',
   });
 
-  // Estado para la previsualización de la imagen
-  const [previewImage, setPreviewImage] = useState(null);
+  
 
   // Manejador de cambios en inputs
   const handleChange = (e) => {
@@ -33,18 +32,6 @@ function AgregarPaciente() {
   };
 
   console.log(formData)
-
-  // Manejador de imagen
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   // Envío del formulario
   const handleSubmit = async (e) => {
@@ -64,10 +51,7 @@ function AgregarPaciente() {
       });
       */
 
-      // Simulación de éxito
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      console.log('Paciente creado con éxito');
+     
       navigate('/pacientes'); // Redirigir a la lista
     } catch (error) {
       console.error('Error al crear paciente:', error);

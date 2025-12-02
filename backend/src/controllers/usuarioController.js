@@ -100,7 +100,7 @@ const createUser = async (req, res) => {
         .doc(userRecord.uid)
         .set(usuario);
 
-      return res.status(200).json({
+      return res.status(201).json({
         status: 'success',
         message: 'usuario registrado satisfactoriamente',
         data: {

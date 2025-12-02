@@ -4,19 +4,18 @@ import axios from 'axios';
 
 function Topbar() {
   const navigate = useNavigate();
+  const loggedUser = JSON.parse(sessionStorage.getItem('loggedUser'));
 
   const handleLogOut = async () => {
-    const user = JSON.parse(sessionStorage.getItem('loggedUser'));
-
     const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/auth/logout`, {
       headers: {
         'Content-Type': 'application/json',
         app: 'admin-webapp',
-        Authorization: `Bearer ${user.idToken}`,
+        Authorization: `Bearer ${loggedUser.idToken}`,
       },
     });
 
-    console.log(data)
+    console.log(data);
 
     sessionStorage.removeItem('loggedUser');
     navigate('/landing');
@@ -28,8 +27,8 @@ function Topbar() {
         <div className="flex items-center gap-3">
           <img src="https://via.placeholder.com/40" className="w-10 h-10 rounded-full" />
           <div>
-            <p className="font-semibold">Dr. James</p>
-            <p className="text-xs text-gray-500">Veterinarian</p>
+            <p className="font-semibold">{`${loggedUser.nombre} ${loggedUser.apellidos}`}</p>
+            <p className="text-xs text-gray-500">{loggedUser.rol}</p>
           </div>
         </div>
 
