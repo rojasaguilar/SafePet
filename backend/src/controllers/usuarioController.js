@@ -91,6 +91,8 @@ const createUser = async (req, res) => {
         email: data.email,
         rol: data.rol,
         telefono: data.telefono,
+        estado: true,
+        especialidad: data.especialidad || null
       };
 
       // Guardar en Firestore

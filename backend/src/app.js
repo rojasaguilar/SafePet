@@ -9,6 +9,7 @@ import usuariosRouter from './routes/usuariosRoutes.js';
 import clinicasRouter from './routes/clinicasRouter.js';
 import citasRouter from './routes/citasRouter.js';
 import authRouter from './routes/authRouter.js';
+import especialidadesRouter from './routes/especialidadesRouter.js';
 
 const app = express();
 
@@ -31,5 +32,6 @@ app.use(`${API_URL_BASE}/usuarios`, usuariosRouter);
 app.use(`${API_URL_BASE}/clinicas`, clinicasRouter);
 app.use(`${API_URL_BASE}/citas`, citasRouter);
 app.use(`${API_URL_BASE}/auth`, authRouter);
+app.use(`${API_URL_BASE}/especialidades`, especialidadesRouter);
 
 export default app;
