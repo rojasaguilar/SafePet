@@ -276,9 +276,39 @@ const updateCita = async (req, res) => {
   }
 };
 
+const deleteCita = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const citaRef = citasCol.doc(id);
+    const snapshot = await citaRef.get();
+
+    if (!snapshot.exists) {
+      return res.status(404).json({
+        status: 'fail',
+        message: `Cita con id ${id} no existe`,
+      });
+    }
+
+    await citaRef.delete();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Cita cancelada correctamente',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 'error',
+      error: error.message,
+    });
+  }
+};
+
 export default {
   getCitas,
   getCita,
   addCita,
   updateCita,
+  deleteCita
 };

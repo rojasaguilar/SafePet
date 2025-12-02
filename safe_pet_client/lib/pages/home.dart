@@ -111,23 +111,6 @@ class _HomeState extends State<Home> {
             icon: Icon(Icons.menu),
             itemBuilder: (context) => [
               PopupMenuItem(child: TextButton(
-                onPressed: (){},
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.black,),
-                    SizedBox(width: 8,),
-                    Text("Perfil",
-                      style: TextStyle(
-                        color: Colors.black
-                      ),
-                    )
-                  ],
-                ),
-                style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero
-                ),
-              )),
-              PopupMenuItem(child: TextButton(
                   onPressed: (){
                     showDialog(
                         context: context,

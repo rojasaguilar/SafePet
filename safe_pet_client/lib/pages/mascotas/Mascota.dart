@@ -10,6 +10,7 @@ import 'package:safe_pet_client/pages/mascotas/crearMascota.dart';
 import 'package:safe_pet_client/theme.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:safe_pet_client/pages/mascotas/mascotasCitas.dart';
 
 class PantallaMascotas extends StatefulWidget {
   PantallaMascotas({super.key});
@@ -103,34 +104,118 @@ class _MascotasScreenState extends State<PantallaMascotas> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('¡Emergencia!'),
-        content:
-            Text('Se enviará un mensaje de emergencia al veterinario. ¿Deseas continuar?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() => _vibrador = false);
-            },
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _sendWhatsAppMessage();
-            },
-            child: Text('Enviar'),
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        titlePadding: EdgeInsets.only(top: 20, left: 20, right: 20),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        actionsPadding: EdgeInsets.zero,
 
+        title: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.emergency, color: Colors.red, size: 50,),
+            ),
+            SizedBox(height: 15),
+            Text('¡Emergencia!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Se enviará un mensaje de emergencia al veterinario.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+              ),
+            ),
+            SizedBox(height: 10),
+            Text('¿Deseas continuar?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+
+        actions: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
+
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _sendWhatsAppMessage();
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.send, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Text('Enviar Emergencia',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
+
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  setState(() => _vibrador = false);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  child: Text('Cancelar',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 17,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
         ],
       ),
-
     );
   }
 
   void _sendWhatsAppMessage() async {
      String Telefono = "+523112558021";
-     String Mensaje = "Tengo una emergencia con mi mascota vato.";
+     String Mensaje = "⚠️ EMERGENCIA\n\nMi mascota requiere atención veterinaria urgente. ¿Está disponible para una consulta inmediata?";
 
     final Uri url = Uri.parse(
         "https://wa.me/$Telefono?text=${Uri.encodeComponent(Mensaje)}"
@@ -496,31 +581,14 @@ class _MascotasScreenState extends State<PantallaMascotas> {
                               children: [
                                 Expanded(
                                   child: ElevatedButton.icon(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (x) => MascotasCitas(
+                                        mascotaId: mascota['id'],
+                                        nombreMascota: mascota['nombre'],
+                                      )));
+                                    },
                                     icon: Icon(Icons.calendar_month, color: Colors.white,),
                                     label: Text("Citas",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey.shade500,
-                                      padding: EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                    ),
-                                    label: Text("Agendar",
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),

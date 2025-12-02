@@ -18,6 +18,7 @@ router
 router
   .route('/:id')
   .get(citasController.getCita)
-  .patch(citasController.updateCita);
+  .patch(citasController.updateCita)
+  .delete(citasController.deleteCita);
 
 export default router;

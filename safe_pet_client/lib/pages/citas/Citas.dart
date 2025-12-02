@@ -1,3 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:safe_pet_client/config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:safe_pet_client/pages/citas/actualizarCita.dart';
 import 'package:safe_pet_client/pages/citas/crearCita.dart';
@@ -11,46 +17,145 @@ class PantallaCitas extends StatefulWidget {
 }
 
 class _CitasScreenState extends State<PantallaCitas> {
-  List<Map<String, String>> citas = [];
+  List<Map<String, dynamic>> citas = [];
+
+  final String apiCitasUrl = "${Config.backendUrl}/citas";
 
   @override
   void initState() {
     super.initState();
-    citas = [
-      {
-        'mascota': 'Olaf',
-        'dueño': 'chuy',
-        'veterinario': 'grapas',
-        'clinica': 'moctezuma',
-        'fechaProgramada': '29/11/2025',
-        'asistencia': 'Pendiente',
-        'fechaCreacion': '2024-10-26 10:00 AM',
-      },
-      {
-        'mascota': 'Arena',
-        'dueño': 'rojas',
-        'veterinario': 'grapas',
-        'clinica': 'moctezuma',
-        'fechaProgramada': '29/11/2025',
-        'asistencia': 'Pendiente',
-        'fechaCreacion': '2024-10-26 10:00 AM'
-      },
-      {
-        'mascota': 'Megacable Vato',
-        'dueño': 'gallaga',
-        'veterinario': 'grapas',
-        'clinica': 'moctezuma',
-        'fechaProgramada': '29/11/2025',
-        'asistencia': 'Pendiente',
-        'fechaCreacion': '2024-10-26 10:00 AM'
-      },
-    ];
+    ObtenerCitas();
   }
-  //cancelar
-  void _cancelarCita(int index) {
-    setState(() {
-      citas.removeAt(index);
-    });
+
+  Future<void> ObtenerCitas() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("Usuario no autenticado");
+        return;
+      }
+
+      final idToken = await user.getIdToken();
+      final url = Uri.parse("$apiCitasUrl?uid=${user.uid}");
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'app': 'client-movile',
+          'Authorization': 'Bearer $idToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final List data = body["data"];
+
+        final citasConClinicas = await Future.wait(
+          data.map((c) async {
+            String nombreClinica = 'Sin clínica';
+
+            if (c['clinica_id'] != null && c['clinica_id']['_path'] != null) {
+              final segments = c['clinica_id']['_path']['segments'];
+              if (segments != null && segments.length >= 2) {
+                final clinicaId = segments[1];
+
+                try {
+                  final clinicaUrl = Uri.parse("${Config.backendUrl}/clinicas/$clinicaId");
+                  final clinicaResp = await http.get(clinicaUrl);
+
+                  if (clinicaResp.statusCode == 200) {
+                    final clinicaData = jsonDecode(clinicaResp.body);
+                    nombreClinica = clinicaData['data']['nombre'] ?? 'Sin clínica';
+                  }
+                } catch (e) {
+                  print("Error obteniendo clínica: $e");
+                }
+              }
+            }
+
+            String fechaProgramadaFormateada = '';
+            if (c['fechaProgramada'] != null) {
+              fechaProgramadaFormateada = c['fechaProgramada'].toString();
+            }
+
+            String fechaCreacionFormateada = '';
+            if (c['fechaCreacion'] != null) {
+              try {
+                if (c['fechaCreacion'] is String) {
+                  DateTime fecha = DateTime.parse(c['fechaCreacion']);
+                  fechaCreacionFormateada = "${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year} ${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')}";
+                } else {
+                  fechaCreacionFormateada = c['fechaCreacion'].toString();
+                }
+              } catch (e) {
+                fechaCreacionFormateada = 'Fecha no disponible';
+              }
+            }
+
+            return {
+              'id': c['cita_id'],
+              'mascota': c['mascota_nombre'],
+              'dueño': c['dueno_nombre'],
+              'veterinario': c['vet_nombre'],
+              'clinica': nombreClinica,
+              'fechaProgramada': fechaProgramadaFormateada,
+              'asistencia': c['asistencia'],
+              'fechaCreacion': fechaCreacionFormateada,
+            };
+          }),
+        );
+
+        setState(() {
+          citas = citasConClinicas;
+        });
+      }
+    } catch (e) {
+      print("Error al conectar con backend: $e");
+    }
+  }
+
+  Future<void> _cancelarCita(int index) async {
+    final citaId = citas[index]['id'];
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Usuario no autenticado")),
+        );
+        return;
+      }
+
+      final idToken = await user.getIdToken();
+
+      final url = Uri.parse("$apiCitasUrl/$citaId");
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'app': 'client-movile',
+          'Authorization': 'Bearer $idToken',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          citas.removeAt(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Cita cancelada correctamente")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al cancelar cita: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error de conexión")),
+      );
+    }
   }
 
   @override
@@ -62,10 +167,7 @@ class _CitasScreenState extends State<PantallaCitas> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.only(
-                  top: 10,
-                  left: 20,
-                ),
+                padding: EdgeInsets.only(top: 10, left: 20,),
                 child: Text("Cuidados para tu mascota",
                   style: TextStyle(
                     fontSize: 22,
@@ -131,7 +233,20 @@ class _CitasScreenState extends State<PantallaCitas> {
           SizedBox(height: 10,),
 
           Expanded(
-            child: ListView.builder(
+            child: citas.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.event_busy, size: 80, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text("No tienes citas agendadas",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
               itemCount: citas.length,
               itemBuilder: (context, index) {
                 final cita = citas[index];
@@ -151,24 +266,39 @@ class _CitasScreenState extends State<PantallaCitas> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
-                                SizedBox(width: 10),
-                                Text('Cita para el: ${cita['fechaProgramada']!}',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text('Cita para el: ${cita['fechaProgramada']!}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
 
                             PopupMenuButton<String>(
                               onSelected: (value) {
                                 if (value == 'editar') {
-                                  Navigator.push(context, MaterialPageRoute(builder: (x) => ActualizarCita()));
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (x) => ActualizarCita(citaId: cita['id'])
+                                      )
+                                  ).then((actualizado) {
+                                    if (actualizado == true) {
+                                      ObtenerCitas();
+                                    }
+                                  });
                                 } else if (value == 'cancelar') {
                                   showDialog(
                                       context: context,
@@ -211,8 +341,8 @@ class _CitasScreenState extends State<PantallaCitas> {
                                                 Divider(height: 1, color: Colors.grey.withOpacity(0.3)),
                                                 InkWell(
                                                   onTap: () {
-                                                    _cancelarCita(index);
                                                     Navigator.pop(context);
+                                                    _cancelarCita(index);
                                                   },
                                                   child: Container(
                                                     width: double.infinity,
@@ -353,7 +483,14 @@ class _CitasScreenState extends State<PantallaCitas> {
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (x) => CrearCita()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (x) => CrearCita())
+          ).then((creada) {
+            if (creada == true) {
+              ObtenerCitas();
+            }
+          });
         },
         label: Text("Crear",
           style: TextStyle(
