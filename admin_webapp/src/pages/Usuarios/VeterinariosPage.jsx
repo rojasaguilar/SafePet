@@ -53,7 +53,7 @@ function VeterinariosPage() {
         </div>
 
         <button
-          onClick={() => navigate('/veterinarios/nuevo')}
+          onClick={() => navigate('/usuarios/nuevo')}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all active:scale-95"
         >
           <Plus size={20} />

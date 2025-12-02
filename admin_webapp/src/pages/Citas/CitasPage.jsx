@@ -43,7 +43,6 @@ function CitasPage() {
         const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/citas`);
         setCitas(data.data);
 
-        // --- MOCK DATA ---
         // await new Promise((resolve) => setTimeout(resolve, 800));
         // setCitas([
         //   {

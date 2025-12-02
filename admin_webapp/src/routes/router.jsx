@@ -15,17 +15,20 @@ import AgregarPaciente from '../pages/Pacientes/AgregarPaciente.jsx';
 // Citas
 import CitasPage from './../pages/Citas/CitasPage.jsx';
 import CitaPage from './../pages/Citas/CitaPage.jsx';
+import AgregarCita from '../pages/Citas/AgregarCita.jsx';
 
 // Usuarios
 import VeterinariosPage from './../pages/Usuarios/VeterinariosPage.jsx';
 import UsuariosPage from './../pages/Usuarios/UsuariosPage.jsx';
 import UsuarioPage from '../pages/Usuarios/UsuarioPage.jsx';
+import AgregarUsuario from '../pages/Usuarios/AgregarUsuario.jsx';
 
 // Clínicas
 import ClinicasPage from './../pages/Clinicas/ClinicasPage.jsx';
-import AgregarCita from '../pages/Citas/AgregarCita.jsx';
-import AgregarUsuario from '../pages/Usuarios/AgregarUsuario.jsx';
+import AgregarClinica from './../pages/Clinicas/AgregarClinica.jsx'
+
 import PrivateRoute from './PrivateRoute.jsx';
+import ClinicaPage from '../pages/Clinicas/ClinicaPage.jsx';
 
 const router = createBrowserRouter([
   { path: '/landing', element: <LandingPage /> },
@@ -139,6 +142,22 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ClinicasPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'clinicas/:id',
+        element: (
+          <PrivateRoute>
+            <ClinicaPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'clinicas/nueva',
+        element: (
+          <PrivateRoute>
+            <AgregarClinica />
           </PrivateRoute>
         ),
       },

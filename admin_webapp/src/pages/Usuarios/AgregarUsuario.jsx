@@ -92,7 +92,7 @@ function AgregarUsuario() {
         >
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-xl font-bold text-slate-800">Registrar Nuevo Paciente</h1>
+        <h1 className="text-xl font-bold text-slate-800">Registrar Nuevo Usuario</h1>
       </div>
 
       <div className="max-w-4xl mx-auto p-6">

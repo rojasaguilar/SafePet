@@ -11,7 +11,9 @@ const getClinicas = async (req, res) => {
       snapshot.docs.map(async (doc) => {
         const clinicaData = doc.data();
 
-        const encargadoRef = db.collection('usuarios').doc(clinicaData.encargado.id);
+        const encargadoRef = db
+          .collection('usuarios')
+          .doc(clinicaData.encargado.id);
         const encargado = await encargadoRef.get();
         const encargadoData = encargado.data();
 
@@ -52,12 +54,21 @@ const getClincia = async (req, res) => {
       });
     }
 
+    const clinicaData = clinicaSnapshot.data();
+
+    const encargadoRef = db
+      .collection('usuarios')
+      .doc(clinicaData.encargado.id);
+    const encargadoSnap = await encargadoRef.get();
+    const encargadoData = encargadoSnap.data()
+
     return res.status(200).json({
       status: 'success',
       message: 'clinica obtenida',
       data: {
         clinica_id: clinicaSnapshot.id,
-        ...clinicaSnapshot.data(),
+        ...clinicaData,
+        encargado_nombre: `${encargadoData.nombre} ${encargadoData.apellidos}`
       },
     });
   } catch (error) {
@@ -69,7 +80,51 @@ const getClincia = async (req, res) => {
   }
 };
 
+const addClinica = async (req, res) => {
+  const { body } = req;
+
+  const datosClinica = { ...body, estado: 'activo' };
+
+  //desestructurar servicios
+  const { servicios } = datosClinica;
+  const arrayServicios = servicios.split(',');
+  datosClinica.servicios = arrayServicios.filter((servicio) => {
+    if (servicio.trim() !== '' || servicio.lengt < 3) return servicio.trim();
+  });
+
+  try {
+    const usuariosRef = db.collection('usuarios').doc(datosClinica.encargado);
+    const usuarioSnap = await usuariosRef.get();
+
+    if (!usuarioSnap.exists) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'encargado no encontrado',
+        datosClinica,
+      });
+    }
+
+    datosClinica.encargado = usuariosRef;
+
+    await clinicasCol.add(datosClinica);
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'clinica registrada',
+      datosClinica,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(201).json({
+      status: 'success',
+      message: 'clinica registrada',
+      datosClinica,
+    });
+  }
+};
+
 export default {
   getClinicas,
   getClincia,
+  addClinica,
 };
