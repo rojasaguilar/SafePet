@@ -16,49 +16,11 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
+import CitasUsuario from '../../components/UsariosComponents/CitasUsuario.jsx';
 
 const loggedUser = JSON.parse(sessionStorage.getItem('loggedUser'));
 
 
-const CitasListaMock = ({ tipo }) => (
-  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-full">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-        <Calendar className={tipo === 'veterinario' ? 'text-blue-500' : 'text-emerald-500'} size={20} />
-        {tipo === 'veterinario' ? 'Agenda Asignada' : 'Historial de Citas'}
-      </h3>
-      <button className="text-sm text-blue-600 font-medium hover:underline">Ver todas</button>
-    </div>
-
-    <div className="space-y-4">
-      {[1, 2].map((i) => (
-        <div
-          key={i}
-          className="flex gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors"
-        >
-          <div className="flex flex-col items-center justify-center bg-white p-3 rounded-lg shadow-sm min-w-[70px]">
-            <span className="text-xs text-slate-400 uppercase font-bold">OCT</span>
-            <span className="text-xl font-bold text-slate-800">{12 + i}</span>
-          </div>
-          <div className="flex-1">
-            <h4 className="font-bold text-slate-700">Vacunación Anual</h4>
-            <div className="flex gap-3 text-xs text-slate-500 mt-1">
-              <span className="flex items-center gap-1">
-                <Clock size={12} /> 10:00 AM
-              </span>
-              <span className="flex items-center gap-1">
-                <PawPrint size={12} /> Max
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Completada</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 // --- COMPONENTE PRINCIPAL ---
 
@@ -266,7 +228,7 @@ function UsuarioPage() {
           {/* --- COLUMNA DERECHA: CITAS (Solo Vets y Usuarios) --- */}
           {rol !== 'admin' && (
             <div className="lg:col-span-7">
-              <CitasListaMock tipo={rol} />
+              <CitasUsuario rol={usuario.rol} id={id}/>
             </div>
           )}
         </div>
