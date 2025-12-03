@@ -26,24 +26,24 @@ function CitasPage() {
   const [citas, setCitas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- ESTADOS DE FILTROS ---
+  
   const [searchTerm, setSearchTerm] = useState(''); // Busca por Cliente o Mascota
   const [filterType, setFilterType] = useState('todos'); // Tipo de Mascota
   const [filterVet, setFilterVet] = useState('todos'); // Veterinario ID o Nombre
   const [filterDate, setFilterDate] = useState(''); // Fecha específica
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' | 'desc' (por fecha/hora)
+  // const [sortOrder, setSortOrder] = useState('-'); // 'asc' | 'desc' (por fecha/hora)
 
-  // Efecto de Carga Inicial
+ 
   useEffect(() => {
     const fetchCitas = async () => {
       setIsLoading(true);
       try {
-        // --- CÓDIGO REAL ---
+      
 
-        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/citas`);
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/citas?sort=fechaProgramada`);
         setCitas(data.data);
 
-        // await new Promise((resolve) => setTimeout(resolve, 800));
+        
         // setCitas([
         //   {
         //     id: 1,
@@ -105,6 +105,8 @@ function CitasPage() {
     fetchCitas();
   }, []);
 
+  // console.log(sortOrder)
+
   // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
   const getFilteredAndSortedCitas = () => {
     let result = [...citas];
@@ -132,12 +134,12 @@ function CitasPage() {
       result = result.filter((c) => c.fechaProgramada === filterDate);
     }
 
-    // 5. Ordenamiento (Fecha + Hora)
-    result.sort((a, b) => {
-      const dateA = new Date(`${a.fecha}T${a.hora}`);
-      const dateB = new Date(`${b.fecha}T${b.hora}`);
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    });
+    // // 5. Ordenamiento (Fecha + Hora)
+    // result.sort((a, b) => {
+    //   const dateA = new Date(`${a.fecha}T${a.hora}`);
+    //   const dateB = new Date(`${b.fecha}T${b.hora}`);
+    //   return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    // });
 
     return result;
   };
@@ -192,8 +194,8 @@ function CitasPage() {
       {/* --- BARRA DE FILTROS AVANZADA --- */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6 space-y-4">
         {/* Fila Superior: Buscador y Fecha */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 group">
+        <div className="flex flex-col md:flex-row gap-4 items-center align-center ">
+          <div className="relative flex-1 group ">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"
               size={20}
@@ -203,22 +205,25 @@ function CitasPage() {
               placeholder="Buscar por cliente o mascota..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700"
+              className="w-2/3 pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700"
             />
           </div>
 
-          <div className="relative w-full md:w-auto">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-              <Calendar size={18} />
-            </div>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="w-full md:w-48 pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
-            />
+          <div className=" w-1/2 md:w-auto">
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('todos');
+                setFilterVet('todos');
+                setFilterDate('');
+              }}
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Limpiar todos los filtros
+            </button>
           </div>
         </div>
+        
 
         {/* Fila Inferior: Dropdowns y Ordenamiento */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between pt-2 border-t border-slate-50">
@@ -267,13 +272,13 @@ function CitasPage() {
           </div>
 
           {/* Botón Ordenar */}
-          <button
-            onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+          {/* <button
+            onClick={() => setSortOrder((prev) => (prev === '-' ? '+' : '-'))}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors w-full md:w-auto justify-center"
           >
             <ArrowUpDown size={16} />
-            {sortOrder === 'asc' ? 'Más antiguas primero' : 'Más recientes primero'}
-          </button>
+            {sortOrder === '+' ? 'Más antiguas primero' : 'Más recientes primero'}
+          </button> */}
         </div>
       </div>
 
@@ -294,7 +299,7 @@ function CitasPage() {
                   <th className="px-6 py-4">Veterinario</th>
                   <th className="px-6 py-4">Motivo</th>
                   <th className="px-6 py-4 text-center">Estado</th>
-                  <th className="px-6 py-4 text-right">Acciones</th>
+                  {/* <th className="px-6 py-4 text-right">Acciones</th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -351,12 +356,12 @@ function CitasPage() {
                     {/* Estado */}
                     <td className="px-6 py-4 text-center">{getStatusBadge(cita.asistencia)}</td>
 
-                    {/* Acciones */}
+                    {/* Acciones
                     <td className="px-6 py-4 text-right">
                       <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-colors">
                         <MoreVertical size={18} />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

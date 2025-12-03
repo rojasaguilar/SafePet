@@ -3,7 +3,7 @@
 // import axios from 'axios';
 // import { ArrowLeft, User, Phone, Mail } from 'lucide-react';
 // import CitasLista from '../../components/PacienteComponents/CitasLista';
-// import CarrucelMascotas from '../../components/CarrucelMascotas';
+import CarrucelMascotas from '../../components/CarrucelMascotas.jsx';
 
 // function UsuarioPage() {
 //   const navigate = useNavigate();
@@ -154,7 +154,9 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
+import ImagenMascota from '../../components/ImagenMascota';
 
+const loggedUser = JSON.parse(sessionStorage.getItem('loggedUser'));
 // --- COMPONENTES MOCK (Para visualizar el diseño sin tus archivos locales) ---
 
 const CitasListaMock = ({ tipo }) => (
@@ -197,37 +199,6 @@ const CitasListaMock = ({ tipo }) => (
   </div>
 );
 
-const CarrucelMascotasMock = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    {[
-      { nombre: 'Max', raza: 'Golden Retriever', tipo: 'Perro', color: 'bg-orange-100 text-orange-600' },
-      { nombre: 'Luna', raza: 'Siamés', tipo: 'Gato', color: 'bg-purple-100 text-purple-600' },
-    ].map((pet, idx) => (
-      <div
-        key={idx}
-        className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group"
-      >
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold ${pet.color}`}>
-          {pet.nombre[0]}
-        </div>
-        <div>
-          <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{pet.nombre}</h4>
-          <p className="text-xs text-slate-500">{pet.raza}</p>
-          <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded-full uppercase font-bold">
-            {pet.tipo}
-          </span>
-        </div>
-      </div>
-    ))}
-
-    {/* Botón Agregar */}
-    <div className="bg-slate-50 p-4 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all cursor-pointer min-h-[100px]">
-      <PawPrint size={24} />
-      <span className="text-sm font-medium">Agregar Mascota</span>
-    </div>
-  </div>
-);
-
 // --- COMPONENTE PRINCIPAL ---
 
 function UsuarioPage() {
@@ -238,6 +209,8 @@ function UsuarioPage() {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+
+  const [mascotas, setMascotas] = useState([]);
 
   // Utils
   const capitalize = (str) => {
@@ -268,16 +241,32 @@ function UsuarioPage() {
     }
   };
 
+  const fetchMascotas = async () => {
+    const { data } = await axios.get(`http://localhost:3456/api/v1/mascotas?ui_dueno=${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        app: 'admin-webapp',
+        Authorization: `Bearer ${loggedUser.idToken}`,
+      },
+    });
+    setMascotas(data.data);
+  };
+
+  console.log(mascotas);
+
+  const fetchUser = async () => {
+    const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/usuarios/${id}`);
+    setUsuario(data.data);
+  };
+
   // Efecto de Carga
   useEffect(() => {
-    const fetchUser = async () => {
+    const loadData = async () => {
       try {
         setCargando(true);
         setError(null);
 
-        // --- CÓDIGO REAL ---
-        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/usuarios/${id}`);
-        setUsuario(data.data);
+        await Promise.all([fetchUser(), fetchMascotas()]);
       } catch (err) {
         console.error('Error:', err);
         setError('No se pudo cargar la información del usuario.');
@@ -285,8 +274,7 @@ function UsuarioPage() {
         setCargando(false);
       }
     };
-
-    if (id) fetchUser();
+    loadData();
   }, [id]);
 
   if (cargando) {
@@ -417,8 +405,6 @@ function UsuarioPage() {
           {/* --- COLUMNA DERECHA: CITAS (Solo Vets y Usuarios) --- */}
           {rol !== 'admin' && (
             <div className="lg:col-span-7">
-              {/* Aquí iría tu componente <CitasLista url={...} /> */}
-              {/* He usado el mock para que visualices el diseño */}
               <CitasListaMock tipo={rol} />
             </div>
           )}
@@ -432,8 +418,7 @@ function UsuarioPage() {
               Mascotas Registradas
             </h3>
 
-            {/* Aquí iría tu componente <CarrucelMascotas url={...} /> */}
-            <CarrucelMascotasMock />
+            <CarrucelMascotas mascotas={mascotas} />
           </div>
         )}
       </div>

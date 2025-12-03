@@ -9,6 +9,7 @@ import Edad from '../../components/Edad.jsx';
 
 import CitasLista from '../../components/PacienteComponents/CitasLista.jsx';
 import Tipo from '../../components/Tipo.jsx';
+import ActualizarPaciente from './ActualizarPaciente.jsx';
 
 function PacientePage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function PacientePage() {
 
   const [mascota, setMascota] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setEditing] = useState(false);
 
   const capitalize = (str) => {
     if (!str) return '';
@@ -42,8 +44,7 @@ function PacientePage() {
   const goBack = () => navigate('/pacientes');
 
   const handleEdit = () => {
-    navigate(`/pacientes/editar/${id}`);
-    console.log('Editando mascota:', id);
+    setEditing(true);
   };
 
   console.log(mascota);
@@ -57,6 +58,8 @@ function PacientePage() {
   }
 
   if (!mascota) return <div className="p-8 text-center">No se encontró la mascota.</div>;
+
+  if (isEditing) return <ActualizarPaciente handleEditing={() => setEditing(false)} />;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-10">

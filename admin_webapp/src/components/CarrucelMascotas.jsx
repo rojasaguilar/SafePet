@@ -1,80 +1,34 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import ImagenMascota from './ImagenMascota.jsx';
+import { PawPrint } from 'lucide-react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MarsIcon, VenusIcon } from 'lucide-react';
 
-function CarrucelMascotas({ url }) {
+function CarrucelMascotas({ mascotas }) {
+  // useEffect(() => {}, []);
   const navigate = useNavigate();
-
-  const [mascotas, setMascotas] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  function getEdad(fechaNacimiento) {
-    const birthDay = new Date(fechaNacimiento);
-    const currentDate = new Date();
-
-    const birthYear = birthDay.getFullYear();
-    const currentYear = currentDate.getFullYear();
-
-    if (currentYear - birthYear > 0) return `${currentYear - birthYear} año`;
-
-    const birthMonth = birthDay.getMonth();
-    const currentMont = currentDate.getMonth();
-
-    if (currentMont - birthMonth > 0) return `${currentMont - birthMonth} meses`;
-  }
-
-  useEffect(() => {
-    const fetchMascotas = async () => {
-      try {
-        setLoading(true);
-        const { data } = await axios.get(url);
-        setMascotas(data.data);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (url) {
-      fetchMascotas();
-    }
-  }, [url]);
-
-  if (loading) return <p>Cargando mascotas...</p>;
-  if (mascotas.length === 0) return <p>Sin mascotas...</p>;
-
   return (
-    <div className="w-full flex flex-col gap-4 ">
-      <h3 className="self-center text-xl font-semibold">Tus mascotas</h3>
-
-      <div className="">
-        {mascotas.map((mascota) => (
-          <div
-            className="flex flex-col w-fit hover:scale-102 transition hover:shadow-lg hover:shadow-gray-400/50 rounded-b-3xl"
-            onClick={() => navigate(`/pacientes/${mascota.id}`)}
-          >
-            <img src={`/src/assets/${mascota.tipo}.jpg`} alt="" className="rounded-t-3xl h-28" />
-            <div className="p-4 space-y-2">
-              {/* NOMBRE Y SEXO */}
-              <div className="bg-white h-fit flex flex-row items-center justify-between gap-1 rounded-3xl">
-                <p className="font-semibold">{capitalize(mascota.nombre)}</p>
-                {mascota.sexo === 'hembra' ? (
-                  <VenusIcon size={18} className=" text-pink-700" />
-                ) : (
-                  <MarsIcon size={18} className=" text-blue-800" />
-                )}
-              </div>
-              <p className="border border-gray-300 w-fit py-1 px-3 rounded-xl text-sm">
-                {getEdad(mascota.fechaNacimiento)}
-              </p>
-            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 ">
+      {mascotas.map((pet, idx) => (
+        <div
+          key={idx}
+          className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group"
+          onClick={() => navigate(`/pacientes/${pet.id}`)}
+        >
+          <ImagenMascota tipo={pet.tipo} />
+          <div>
+            <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{pet.nombre}</h4>
+            <p className="text-xs text-slate-500">{pet.raza}</p>
+            <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded-full uppercase font-bold">
+              {pet.tipo}
+            </span>
           </div>
-        ))}
+        </div>
+      ))}
+
+      {/* Botón Agregar */}
+      <div className="bg-slate-50 p-4 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all cursor-pointer min-h-[100px]">
+        <PawPrint size={24} />
+        <span className="text-sm font-medium">Agregar Mascota</span>
       </div>
     </div>
   );
