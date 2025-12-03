@@ -63,8 +63,10 @@ class _MascotasCitasState extends State<MascotasCitas> {
           citas = data.map<Map<String, dynamic>>((c) {
             String fechaProgramadaFormateada = '';
             String fechaCreacionFormateada = '';
+            String horaProgramada = '';
 
             fechaProgramadaFormateada = c['fechaProgramada'] ?? '';
+            horaProgramada = c['hora'] ?? '';
 
             if (c['fechaCreacion'] != null) {
               try {
@@ -80,7 +82,7 @@ class _MascotasCitasState extends State<MascotasCitas> {
               'veterinario': c['vet_nombre'] ?? 'Sin veterinario',
               'clinica': c['clinica_nombre'] ?? 'Sin clínica',
               'fechaProgramada': fechaProgramadaFormateada,
-              'hora': c['hora'] ?? '',
+              'hora': horaProgramada,
               'asistencia': c['asistencia'] ?? 'Pendiente',
               'fechaCreacion': fechaCreacionFormateada,
               'motivo': c['motivo'] ?? 'Sin motivo especificado',
@@ -225,18 +227,46 @@ class _MascotasCitasState extends State<MascotasCitas> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
-                                SizedBox(width: 10),
-                                Text(cita['fechaProgramada']!,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(cita['fechaProgramada']!,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  if (cita['hora'] != null && cita['hora'].toString().isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 6),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.access_time, size: 30, color: Colors.blueAccent),
+                                          SizedBox(width: 10),
+                                          Text('${cita['hora']}',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                             PopupMenuButton<String>(
                               onSelected: (value) {
@@ -248,14 +278,12 @@ class _MascotasCitasState extends State<MascotasCitas> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(20),
                                         ),
-                                        titlePadding: EdgeInsets.only(
-                                            top: 20, left: 20, right: 20),
+                                        titlePadding: EdgeInsets.only(top: 20, left: 20, right: 20),
                                         contentPadding: EdgeInsets.zero,
                                         actionsPadding: EdgeInsets.zero,
                                         title: Column(
                                           children: [
-                                            Icon(Icons.warning_amber_rounded,
-                                                color: Colors.red, size: 48),
+                                            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 48),
                                             SizedBox(height: 10),
                                             Text("¿Cancelar cita?",
                                               textAlign: TextAlign.center,

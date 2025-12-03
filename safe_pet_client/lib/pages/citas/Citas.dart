@@ -75,8 +75,12 @@ class _CitasScreenState extends State<PantallaCitas> {
             }
 
             String fechaProgramadaFormateada = '';
+            String horaProgramada = '';
             if (c['fechaProgramada'] != null) {
               fechaProgramadaFormateada = c['fechaProgramada'].toString();
+            }
+            if (c['hora'] != null) {
+              horaProgramada = c['hora'].toString();
             }
 
             String fechaCreacionFormateada = '';
@@ -100,6 +104,7 @@ class _CitasScreenState extends State<PantallaCitas> {
               'veterinario': c['vet_nombre'],
               'clinica': nombreClinica,
               'fechaProgramada': fechaProgramadaFormateada,
+              'hora': horaProgramada,
               'asistencia': c['asistencia'],
               'fechaCreacion': fechaCreacionFormateada,
             };
@@ -267,21 +272,43 @@ class _CitasScreenState extends State<PantallaCitas> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text('Cita para el: ${cita['fechaProgramada']!}',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                  Row(
+                                    children: [
+                                      Icon(Icons.event_available, color: Colors.blueAccent, size: 30),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text('${cita['fechaProgramada']!}',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
+                                        ),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
+                                    ],
                                   ),
+                                  if (cita['hora'] != null && cita['hora'].toString().isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 6),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.access_time, size: 30, color: Colors.blueAccent),
+                                          SizedBox(width: 10),
+                                          Text('${cita['hora']}',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -388,9 +415,9 @@ class _CitasScreenState extends State<PantallaCitas> {
                                       value: 'editar',
                                       child: Row(
                                         children: [
-                                          Icon(Icons.edit, size: 18,),
+                                          Icon(Icons.event_repeat, size: 18,),
                                           SizedBox(width: 8,),
-                                          Text("Editar", style: TextStyle(color: Colors.black),)
+                                          Text("Reagendar", style: TextStyle(color: Colors.black),)
                                         ],
                                       )
                                   ),
@@ -410,7 +437,7 @@ class _CitasScreenState extends State<PantallaCitas> {
                           ],
                         ),
 
-                        SizedBox(height: 6),
+                        SizedBox(height: 12),
 
                         Row(
                           children: [

@@ -43,7 +43,7 @@ class NotificationService {
         ?.createNotificationChannel(channel);
 
     await _requestPermissions();
-    await _requestExactAlarmPermission(); // ⬅️ NUEVO
+    await _requestExactAlarmPermission();
 
     print('✅ NotificationService inicializado correctamente');
   }
@@ -59,7 +59,6 @@ class NotificationService {
     }
   }
 
-  // ⬇️ NUEVO MÉTODO
   static Future<void> _requestExactAlarmPermission() async {
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
     _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
@@ -78,25 +77,23 @@ class NotificationService {
   }) async {
     final now = tz.TZDateTime.now(tz.local);
 
-    var nextBirthday = now.add(const Duration(seconds: 10));
+    var nextBirthday = tz.TZDateTime(
+      tz.local,
+      now.year,
+      birthday.month,
+      birthday.day,
+      9, // 9 AM
+    );
 
-    // var nextBirthday = tz.TZDateTime(
-    //   tz.local,
-    //   now.year,
-    //   birthday.month,
-    //   birthday.day,
-    //   9, // 9 AM
-    // );
-    //
-    // if (nextBirthday.isBefore(now)) {
-    //   nextBirthday = tz.TZDateTime(
-    //     tz.local,
-    //     now.year + 1,
-    //     birthday.month,
-    //     birthday.day,
-    //     9,
-    //   );
-    // }
+    if (nextBirthday.isBefore(now)) {
+      nextBirthday = tz.TZDateTime(
+        tz.local,
+        now.year + 1,
+        birthday.month,
+        birthday.day,
+        9,
+      );
+    }
 
     const AndroidNotificationDetails androidDetails =
     AndroidNotificationDetails(
@@ -125,7 +122,7 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        // matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime, // ⬅️ Descomenta en producción
+        matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
       );
       print('✅ Notificación DEMO programada para $petName en 10 segundos: $nextBirthday');
     } catch (e) {

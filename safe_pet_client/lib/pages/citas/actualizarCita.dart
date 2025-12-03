@@ -16,91 +16,16 @@ class ActualizarCita extends StatefulWidget {
 class _ActualizarCitaState extends State<ActualizarCita> {
   final fecha = TextEditingController();
   final hora = TextEditingController();
-  final motivo = TextEditingController();
-  final notas = TextEditingController();
-
-  String? mascotaSeleccionada;
-  String? vetSeleccionado;
-  String? clinicaSeleccionada;
-  String? asistenciaSeleccionada;
-
-  List<Map<String, dynamic>> mascotas = [];
-  List<Map<String, dynamic>> veterinarios = [];
-  List<Map<String, dynamic>> clinicas = [];
 
   @override
   void initState() {
     super.initState();
-    cargarDatos();
+    cargarCita();
   }
 
-  Future<void> cargarDatos() async {
-    await Future.wait([
-      cargarMascotas(),
-      cargarVeterinarios(),
-      cargarClinicas(),
-      cargarCita(),
-    ]);
-  }
-
-  Future<void> cargarMascotas() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final idToken = await user.getIdToken();
-      final url = Uri.parse("${Config.backendUrl}/mascotas");
-      final resp = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'app': 'client-movile',
-          'Authorization': 'Bearer $idToken',
-        },
-      );
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-        setState(() {
-          mascotas = List<Map<String, dynamic>>.from(data['data']);
-        });
-      }
-    } catch (e) {
-      print("Error cargando mascotas: $e");
-    }
-  }
-
-  Future<void> cargarVeterinarios() async {
-    try {
-      final url = Uri.parse("${Config.backendUrl}/usuarios?rol=veterinario");
-      final resp = await http.get(url);
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-        setState(() {
-          veterinarios = List<Map<String, dynamic>>.from(data['data']);
-        });
-      }
-    } catch (e) {
-      print("Error cargando veterinarios: $e");
-    }
-  }
-
-  Future<void> cargarClinicas() async {
-    try {
-      final url = Uri.parse("${Config.backendUrl}/clinicas");
-      final resp = await http.get(url);
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-        setState(() {
-          clinicas = List<Map<String, dynamic>>.from(data['data']);
-        });
-      }
-    } catch (e) {
-      print("Error cargando clínicas: $e");
-    }
-  }
+  String asistenciaActual = 'pendiente';
+  String motivoActual = '';
+  String notasActuales = '';
 
   Future<void> cargarCita() async {
     try {
@@ -117,9 +42,6 @@ class _ActualizarCitaState extends State<ActualizarCita> {
           'Authorization': 'Bearer $idToken',
         },
       );
-
-      print("Status cargar cita: ${resp.statusCode}");
-      print("Response: ${resp.body}");
 
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -146,42 +68,12 @@ class _ActualizarCitaState extends State<ActualizarCita> {
           }
         }
 
-        String? mascotaId;
-        if (cita['mascota_id'] != null) {
-          if (cita['mascota_id'] is String) {
-            mascotaId = cita['mascota_id'];
-          } else if (cita['mascota_id'] is Map) {
-            mascotaId = cita['mascota_id']['id'];
-          }
-        }
-
-        String? vetId;
-        if (cita['vet_id'] != null) {
-          if (cita['vet_id'] is String) {
-            vetId = cita['vet_id'];
-          } else if (cita['vet_id'] is Map) {
-            vetId = cita['vet_id']['id'];
-          }
-        }
-
-        String? clinicaId;
-        if (cita['clinica_id'] != null) {
-          if (cita['clinica_id'] is String) {
-            clinicaId = cita['clinica_id'];
-          } else if (cita['clinica_id'] is Map) {
-            clinicaId = cita['clinica_id']['id'];
-          }
-        }
-
         setState(() {
           fecha.text = fechaFormateada;
           hora.text = horaFormateada;
-          motivo.text = cita['motivo'] ?? '';
-          notas.text = cita['notas'] ?? '';
-          mascotaSeleccionada = mascotaId;
-          vetSeleccionado = vetId;
-          clinicaSeleccionada = clinicaId;
-          asistenciaSeleccionada = cita['asistencia'] ?? 'pendiente';
+          asistenciaActual = cita['asistencia'] ?? 'pendiente';
+          motivoActual = cita['motivo'] ?? '';
+          notasActuales = cita['notas'] ?? '';
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -216,14 +108,13 @@ class _ActualizarCitaState extends State<ActualizarCita> {
 
     List<String> partesFecha = fecha.text.split('/');
     String fechaISO = "${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}";
-
     String fechaHoraISO = "${fechaISO}T${hora.text}:00";
 
     final body = {
       "fechaProgramada": fechaHoraISO,
-      "asistencia": asistenciaSeleccionada,
-      "motivo": motivo.text,
-      "notas": notas.text,
+      "asistencia": asistenciaActual,
+      "motivo": motivoActual,
+      "notas": notasActuales,
     };
 
     try {
@@ -241,7 +132,7 @@ class _ActualizarCitaState extends State<ActualizarCita> {
       if (resp.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Cita actualizada correctamente"),
+            content: Text("Cita reagendada correctamente"),
             backgroundColor: Colors.green,
           ),
         );
@@ -249,7 +140,7 @@ class _ActualizarCitaState extends State<ActualizarCita> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error al actualizar cita"),
+            content: Text("Error al reagendar cita"),
             backgroundColor: Colors.red,
           ),
         );
@@ -282,7 +173,7 @@ class _ActualizarCitaState extends State<ActualizarCita> {
     return Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          title: Text("Actualizar Cita", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text("Reagendar Cita", style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
           backgroundColor: Colors.white,
           foregroundColor: Colores.azulOscuro,
@@ -299,7 +190,7 @@ class _ActualizarCitaState extends State<ActualizarCita> {
               child: Row(
                 children: [
                   Container(
-                    child: Icon(Icons.date_range_sharp, color: Colors.white, size: 32),
+                    child: Icon(Icons.event_repeat, color: Colors.white, size: 32),
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
@@ -312,14 +203,14 @@ class _ActualizarCitaState extends State<ActualizarCita> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Actualiza la información",
+                      Text("Reagendar Cita",
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      Text("Modifica los detalles necesarios",
+                      Text("Selecciona nueva fecha y hora",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white.withOpacity(0.9),
@@ -359,7 +250,7 @@ class _ActualizarCitaState extends State<ActualizarCita> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Text("Programación de la Cita",
+                        Text("Nueva Programación",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -446,58 +337,6 @@ class _ActualizarCitaState extends State<ActualizarCita> {
                         }
                       },
                     ),
-                    SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Container(
-                          width: 4, height: 20,
-                          decoration: BoxDecoration(
-                            color: Colores.azulPrimario,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text("Estado y Detalles",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colores.azulOscuro,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 12),
-
-                    DropdownButtonFormField<String>(
-                      value: asistenciaSeleccionada,
-                      items: [
-                        DropdownMenuItem(value: "pendiente", child: Text("Pendiente")),
-                        DropdownMenuItem(value: "confirmada", child: Text("Confirmada")),
-                        DropdownMenuItem(value: "completada", child: Text("Completada")),
-                        DropdownMenuItem(value: "cancelada", child: Text("Cancelada")),
-                      ],
-                      onChanged: (v) =>
-                          setState(() => asistenciaSeleccionada = v),
-                      decoration: deco("Estado", Icons.event_available),
-                    ),
-
-                    SizedBox(height: 20),
-
-                    TextField(
-                      controller: motivo,
-                      decoration: deco("Motivo de la cita", Icons.notes),
-                      maxLines: 2,
-                    ),
-
-                    SizedBox(height: 20),
-
-                    TextField(
-                      controller: notas,
-                      decoration:
-                      deco("Notas adicionales", Icons.note_add),
-                      maxLines: 3,
-                    ),
 
                     SizedBox(height: 20),
 
@@ -528,9 +367,9 @@ class _ActualizarCitaState extends State<ActualizarCita> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.autorenew, color: Colors.white,),
+                                  Icon(Icons.event_repeat, color: Colors.white,),
                                   SizedBox(width: 6,),
-                                  Text("Actualizar",
+                                  Text("Reagendar",
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
