@@ -5,11 +5,16 @@ const citasCol = db.collection('citas');
 const getCitas = async (req, res) => {
   // ... tu lógica de query existente ...
   let query = citasCol;
-  const { mascotaId, uid,sort } = req.query;
+  const { mascotaId, uid, sort, vet_id } = req.query;
 
   if (mascotaId) {
     const mascotaRef = db.collection('mascotas').doc(mascotaId);
     query = query.where('mascota_id', '==', mascotaRef);
+  }
+
+  if (vet_id) {
+    const vetRef = db.collection('usuarios').doc(vet_id);
+    query = query.where('vet_id', '==', vetRef);
   }
 
   if (uid) {
@@ -17,8 +22,8 @@ const getCitas = async (req, res) => {
     query = query.where('ui_dueno', '==', usuarioRef);
   }
 
-  if(sort){
-    query = query.orderBy(sort, "asc")
+  if (sort) {
+    query = query.orderBy(sort, 'asc');
   }
 
   try {
@@ -298,8 +303,8 @@ const updateCita = async (req, res) => {
 
   const updatedCita = {
     asistencia: body.asistencia,
-    motivo: body.motivo || "",
-    notas: body.notas || "",
+    motivo: body.motivo || '',
+    notas: body.notas || '',
   };
 
   if (body.fechaProgramada) {
