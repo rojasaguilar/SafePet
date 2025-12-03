@@ -1,3 +1,3 @@
 class Config {
-  static const backendUrl = "http://10.0.2.2:3456/api/v1"; // Android emulator
+  static const backendUrl = "https://safe-pet-jskf.vercel.app/api/v1";
 }
