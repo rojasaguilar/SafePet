@@ -31,7 +31,7 @@ function PacientesPage() {
 
         const loggedUser = JSON.parse(storedUser);
 
-        const { data } = await axios.get('http://localhost:3456/api/v1/mascotas', {
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/mascotas`, {
           headers: {
             'Content-Type': 'application/json',
             app: 'admin-webapp',

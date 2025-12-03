@@ -29,7 +29,7 @@ function UsuariosPage() {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        const { data } = await axios.get('http://localhost:3456/api/v1/usuarios');
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/usuarios`);
         setUsuarios(data.data);
       } catch (error) {
         console.error('Error cargando usuarios:', error);

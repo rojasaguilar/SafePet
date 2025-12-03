@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import EstadoCita from './EstadoCita';
 import { Calendar, Clock, User } from 'lucide-react';
 
 

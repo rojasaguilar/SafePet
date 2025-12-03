@@ -13,7 +13,7 @@ function VeterinariosPage() {
     const getVeterinarios = async () => {
       setIsLoading(true);
       try {
-        const { data } = await axios.get('http://localhost:3456/api/v1/usuarios?rol=veterinario');
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL_BASE}/usuarios?rol=veterinario`);
         setVeterinarios(data.data);
       } catch (error) {
         console.error('Error al cargar veterinarios:', error);
